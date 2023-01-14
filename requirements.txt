@@ -18,3 +18,4 @@ statsmodels
 torch
 imageio==2.6.0
 imageio-ffmpeg==0.4.2
+gym
