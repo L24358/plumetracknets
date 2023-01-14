@@ -13,7 +13,7 @@ import time
 import multiprocessing
 import os
 import matplotlib 
-import config
+import tracer.config as config
 np.random.seed(config.seed_global)
 
 import mpl_scatter_density

@@ -103,11 +103,11 @@ from pprint import pprint
 import glob
 import sys
 sys.path.append('/home/satsingh/plume/plume2/')
-from code.plume_env import PlumeEnvironment, PlumeFrameStackEnvironment
-import agents
-import agent_analysis
+from tracer.plume_env import PlumeEnvironment, PlumeFrameStackEnvironment
+#import agents
+import tracer.agent_analysis
 import os
-import log_analysis
+import tracer.log_analysis
 
 from a2c_ppo_acktr.envs import VecPyTorch, make_vec_envs
 from a2c_ppo_acktr.utils import get_render_func, get_vec_normalize

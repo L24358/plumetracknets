@@ -12,9 +12,9 @@ import matplotlib.lines as mlines
 import matplotlib.patches as mpatches
 from matplotlib.collections import PatchCollection
 
-import agents
-import sim_analysis
-import config
+#import agents
+import tracer.sim_analysis
+import tracer.config
 
 from moviepy.editor import ImageClip, concatenate_videoclips
 from natsort import natsorted
@@ -23,7 +23,7 @@ import os
 
 from pylab import figure, text, scatter, show
 
-import log_analysis
+import tracer.log_analysis
 
 import tqdm
 

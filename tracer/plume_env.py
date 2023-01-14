@@ -9,11 +9,11 @@ import numpy as np
 import gym
 from gym import spaces
 
-import sim_analysis
+import tracer.sim_analysis
 import tqdm
 from pprint import pprint
 
-import config
+import tracer.config
 from scipy.spatial.distance import cdist 
 
 class PlumeEnvironment(gym.Env):
