@@ -169,6 +169,8 @@ def load_plume(
     puff_filename = f'{data_dir}/puff_data_{dataset}.pickle' 
     wind_filename = f'{data_dir}/wind_data_{dataset}.pickle' 
 
+    # TODO: insert file_pointer
+
     # pandas dataframe
     data_puffs = pandas.read_pickle(puff_filename)
     data_wind = pandas.read_pickle(wind_filename)
