@@ -1,0 +1,19 @@
+@ Meeting on 20230113:
+    1. I want to be able to load (multiple) trained agents, and access their connectivity matrix.
+        - What is the structure of the network?
+    2. Model input (data format & loading) and output (trial visualization)
+    3. The analysis that are already done:
+        - Eigenvalue plot (how fast to the eigenvalues decay?)
+        - Timescale
+        - No fixed points (How did you determine that there are no fixed points?)
+    4. How are the dynamic regimes found?
+    5. Training code (if possible)
+    6. Function of each script (if possible)
+    7. requirements.txt?
+    8. How to install pytorch-a2c-ppo-acktr-gail?
+    9. README
+
+@ Code location:
+    1. Calling the eigenvalues of the network: ppo.report_arch.ipynb
+    2. Loading agent: ppo.evalCli.py
+    3. Create environment: ppo.a2c_ppo_acktr.envs.py
