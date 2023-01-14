@@ -7,7 +7,6 @@ spyder
 gym
 stable_baselines3
 moviepy
-mpi4py
 tqdm
 urllib3
 virtualenv
