@@ -3,6 +3,8 @@ RUN pip3 install pytest
 
 COPY ./ /src
 
+RUN pip3 install -e . 
+
 ENV TINI_VERSION v0.6.0
 ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /usr/bin/tini
 RUN chmod +x /usr/bin/tini
