@@ -484,4 +484,4 @@ actor_critic, ob_rms = torch.load(args.model_fname, map_location=torch.device('c
 
 for name, param in actor_critic.named_parameters():
     if "rnn" in name:
-        np.save(os.path.join(modelpath, "rnn_matrix", args.model_fname + "_type=" + name + ".npy"), param.detach().numpy())
+        np.save(os.path.join(modelpath, "rnn_matrix", args.model_fname[:-3] + "_type=" + name + ".npy"), param.detach().numpy())

@@ -1,0 +1,1 @@
+class TargetNotFoundError(Exception): pass
