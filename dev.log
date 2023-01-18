@@ -17,3 +17,4 @@
     1. Calling the eigenvalues of the network: ppo.report_arch.ipynb
     2. Loading agent: ppo.evalCli.py
     3. Create environment: ppo.a2c_ppo_acktr.envs.py
+    4. Model definition: ppo.a2c_ppo_acktr.model.py

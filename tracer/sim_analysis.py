@@ -18,8 +18,6 @@ np.random.seed(config.seed_global)
 
 import mpl_scatter_density
 
-from reducer.support.navigator import file_pointer
-
 def get_puff_birthtime(data_puffs, puff_number):
     p = data_puffs[data_puffs.puff_number==puff_number].time.values
     p = p[np.where(p>0)]
@@ -170,10 +168,6 @@ def load_plume(
     print(dataset)
     puff_filename = f'{data_dir}/puff_data_{dataset}.pickle' 
     wind_filename = f'{data_dir}/wind_data_{dataset}.pickle' 
-
-    # TODO: insert file_pointer
-    puff_filename = file_pointer(f"puff_data_{dataset}.pkl", dataset)
-    wind_filename = file_pointer(f"wind_data_{dataset}.pkl", dataset)
 
     # pandas dataframe
     data_puffs = pandas.read_pickle(puff_filename)
