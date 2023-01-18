@@ -1,3 +1,6 @@
+@ 20230118 TTD:
+    1. Two input projections strongly project to one of the unstable eigenvectors.
+
 @ Meeting on 20230113:
     1. I want to be able to load (multiple) trained agents, and access their connectivity matrix.
         - What is the structure of the network?

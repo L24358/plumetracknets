@@ -2,6 +2,7 @@ import os
 import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
+import reducer.support.basics as bcs
 import reducer.support.navigator as nav
 from reducer.config import modelpath, graphpath
 
@@ -13,7 +14,7 @@ if 0:
         os.system(f"python3 /src/tracer/ppo/evalCli.py --model_fname {modelname}")
 
 # Eigenvalue spectrum of recurrent matrix
-if 0:
+if 1:
     modelnames = nav.file_finder(
         target="weight_hh",
         extension=".npy",
@@ -27,7 +28,7 @@ if 0:
         ev, ew = np.linalg.eig(rnn)
         
         filename = os.path.splitext(os.path.basename(modelname))[0]
-        seed = nav.param_finder(filename, "seed", sep2=None)
+        seed = bcs.param_finder(filename, "seed", sep2=None)
 
         ax1.plot(sorted(ev, reverse=True), label=seed)
         
@@ -35,9 +36,10 @@ if 0:
     plt.legend()
     plt.tight_layout()
     plt.savefig(os.path.join(graphpath, "eigenvalues.png"), dpi=200)
+    plt.clf()
 
 # Connection weights of the input matrix
-if 0:
+if 1:
     modelnames = nav.file_finder(
         target="weight_ih",
         extension=".npy",
@@ -46,7 +48,7 @@ if 0:
     for modelname in modelnames:
         rnn = np.load(modelname)
         filename = os.path.splitext(os.path.basename(modelname))[0]
-        seed = nav.param_finder(filename, "seed", sep2=None)
+        seed = bcs.param_finder(filename, "seed", sep2=None)
 
         fig = plt.figure(figsize=(8, 4))
         ax1 = fig.add_subplot(121)
@@ -75,9 +77,10 @@ if 1:
 
     for modelname in modelnames:
         filename = os.path.splitext(os.path.basename(modelname))[0]
-        seed = nav.param_finder(filename, "seed", sep2=None)
+        seed = bcs.param_finder(filename, "seed", sep2=None)
         rnn = np.load(modelname)
 
         sns.clustermap(rnn)
         plt.title("Connectivity Matrix Clustermap")
         plt.savefig(os.path.join(graphpath, f"clustermap_seed={seed[4:]}.png"), dpi=200)
+        plt.clf()
