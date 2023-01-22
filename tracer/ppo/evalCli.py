@@ -482,6 +482,14 @@ if 'MLP' in args.model_fname:
 actor_critic, ob_rms = torch.load(args.model_fname, map_location=torch.device('cpu'))
 # eval_loop(args, actor_critic, test_sparsity=args.test_sparsity)
 
-for name, param in actor_critic.named_parameters():
-    if "rnn" in name:
-        np.save(os.path.join(modelpath, "rnn_matrix", args.model_fname[:-3] + "_type=" + name + ".npy"), param.detach().numpy())
+# Save the rnn matrices as .npy files
+if 0: 
+    for name, param in actor_critic.named_parameters():
+        if "rnn" in name:
+            np.save(os.path.join(modelpath, "rnn_matrix", args.model_fname[:-3] + "_type=" + name + ".npy"), param.detach().numpy())
+
+# Save actor and dist as .npy files
+if 1:
+    for name, param in actor_critic.named_parameters():
+        if ("actor" in name) or ("dist" in name):
+            np.save(os.path.join(modelpath, "actors", args.model_fname[:-3] + "_type=" + name + ".npy"), param.detach().numpy())

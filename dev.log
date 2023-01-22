@@ -1,4 +1,8 @@
-@ 20230118 TTD:
+@ 20230119 TTD:
+    1. What are the fixed points and Jacobian of this system? (What do the eigenvectors of the connectivity matrix mean)
+    2. 
+
+@ 20230118 Observations / Results:
     1. Two input projections strongly project to one of the unstable eigenvectors.
 
 @ Meeting on 20230113:
