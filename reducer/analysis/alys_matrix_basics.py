@@ -6,13 +6,6 @@ import reducer.support.basics as bcs
 import reducer.support.navigator as nav
 from reducer.config import modelpath, graphpath
 
-# Extract (save as npy) RNN matrices
-if 0:
-    modelnames = nav.file_finder()
-    for modelname in modelnames:
-        print(modelname)
-        os.system(f"python3 /src/tracer/ppo/evalCli.py --model_fname {modelname}")
-
 # Eigenvalue spectrum of recurrent matrix
 if 1:
     modelnames = nav.file_finder(

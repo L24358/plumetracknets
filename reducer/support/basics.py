@@ -49,3 +49,28 @@ def model_loader(specify="all"):
         return list(rnns.values())[idx]
     elif type(specify) == int: return list(rnns.values())[specify]
     else: raise InputError(f"keyword `specify` does not support {specify}.")
+
+def actor_loader(specify="all"):
+    nns = {}
+    for mtype in ["base.actor1.0.weight", "base.actor1.0.bias", "base.actor.0.weight", "base.actor.0.bias",\
+        "dist.fc_mean.weight", "dist.fc_mean.bias", "dist.logstd._bias"]:
+        modelnames = nav.file_finder(
+            target=mtype,
+            extension=".npy",
+            parent_name=os.path.join(modelpath, "actors"))
+        for modelname in modelnames:
+            key = param_finder(modelname, "seed", sep2=None)[4:]
+            if key not in nns.keys(): nns[key] = {}
+            nns[key][mtype] = np.load(modelname)
+
+    for key in nns.keys():
+        if len(nns[key]) != 7: raise AlgorithmError("Did not find complete set of weight/bias matrices!")
+
+    # Return value depends on specify
+    if specify == "all": return nns
+    elif specify == "random":
+        idx = np.random.choice(len(nns.keys()))
+        print(f"Loading model {idx+1}.")
+        return list(nns.values())[idx]
+    elif type(specify) == int: return list(nns.values())[specify]
+    else: raise InputError(f"keyword `specify` does not support {specify}.")
