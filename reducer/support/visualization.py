@@ -42,6 +42,21 @@ def plot_trajectory(trajectory, figname="temp.png", save=True, plot_time=True, a
     else: ax.plot(*trajectory, alpha=0.5, color=kw["color"])
     if save: savefig(figname)
 
+def plot_quantities(quantities, figname="temp.png", save=True, ax=None, **kwargs):
+    """
+    Plot `quantities` in `ax`.
+    """
+    Q, N = len(quantities), len(quantities[0])
+    kw = {"color": ["k"]*Q, "time": range(N), "label": [""]*Q, "xlabel":"time", "ylabel":"", "subtitle":"", "linestyle":["-"]*Q}
+    kw.update(kwargs)
+
+    if ax == None: ax = plt.figure().add_subplot(111)
+    for q in range(len(quantities)):
+        ax.plot(kw["time"], quantities[q], color=kw["color"][q], label=kw["label"][q], linestyle=kw["linestyle"][q])
+        ax.set_xlabel(kw["xlabel"]); ax.set_ylabel(kw["ylabel"]); ax.set_title(kw["subtitle"])
+        if not (kw["label"] == [""]*Q): ax.legend()
+    if save: savefig(figname)
+
 def plot_multiple_trajectory(trajectories, figname="temp.png", save=True, plot_time=True, **kwargs):
     """
     Plot `trajectories` in multiple subplots of shape (1, s), s=#subplots.
