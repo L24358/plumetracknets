@@ -4,9 +4,9 @@ import reducer.support.dynamics as dy
 from itertools import product
 
 def sweep_observations(n, rnn, inn, br, bi):
-    x1 = np.linspace(-2, 8, n)
-    x2 = np.linspace(-4, 2, n)
-    x3 = np.linspace(-0.2, 8, n)
+    x1 = np.linspace(0, 1, n) # -2, 8
+    x2 = np.linspace(-1, 1, n) # -4, 2
+    x3 = np.linspace(-1, 1, n) # -0.2, 8
 
     grid = range(n)
     is_linear = np.zeros((n,n,n))

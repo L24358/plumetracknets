@@ -4,11 +4,10 @@ import reducer.support.dynamics as dy
 import reducer.support.visualization as vis
 
 # Load model
-rnn, inn, br, bi = bcs.model_loader(specify="random") # Take the first model
-br = bi = np.zeros(br.shape) ##
+rnn, inn, br, bi = bcs.model_loader(specify=0) # Take the first model
 
 # Obtain the fixed points
-x_0 = [0, 0, 0]
+x_0 = [0.25, 0, -0.5]
 args = [x_0, rnn, inn, br, bi]
 fps = dy.get_fixed_points(*args)
 Js = [dy.jacobian(fp, args) for fp in fps]
@@ -21,5 +20,5 @@ for i in range(len(fps)):
 
 # Simulate and plot trial with fixed point as i.c.
 h_0 = fps[0] # Take the first fixed point
-t, y = dy.sim(rnn, inn, br, bi, dy.constant_obs(x_0), h_0, T=100)
-vis.plot_PCA_3d(y) # Plot first 3 PCA dimensions
+t, y = dy.sim(rnn, inn, br, bi, dy.constant_obs(x_0), h_0, T=1000)
+vis.plot_PCA_3d(y, figname="fixed_point_evolution.png") # Plot first 3 PCA dimensions

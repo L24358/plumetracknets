@@ -1,8 +1,11 @@
 import os
+import pickle
 import numpy as np
 import reducer.support.navigator as nav
 from reducer.config import modelpath
 from reducer.support.exceptions import TargetNotFoundError, AlgorithmError, InputError
+
+seed_order = ['2760377', '3199993', '9781ba', '541058', '3307e9']
 
 def param_finder(string, target, sep="_", sep2="="):
     params = string.split(sep)
@@ -26,6 +29,11 @@ def get_bins(data, nbins):
     minn, maxx = min(data), max(data)
     return np.linspace(minn, maxx, nbins+1)
 
+def upsample(x, n): return np.repeat(x, n, axis=0)
+
+def downsample(x, n):
+    return np.array([x[n*i: n*(i+1)].mean() for i in range(len(x)//n - 1)])
+
 def model_loader(specify="all"):
     rnns = {}
     for mtype in ["weight_hh", "weight_ih", "bias_hh", "bias_ih"]:
@@ -47,7 +55,9 @@ def model_loader(specify="all"):
         idx = np.random.choice(len(rnns.keys()))
         print(f"Loading model {idx+1}.")
         return list(rnns.values())[idx]
-    elif type(specify) == int: return list(rnns.values())[specify]
+    elif type(specify) == int:
+        print(f"Loading model {specify}, i.e. seed={list(rnns.keys())[specify]}")
+        return list(rnns.values())[specify]
     else: raise InputError(f"keyword `specify` does not support {specify}.")
 
 def actor_loader(specify="all"):
@@ -74,3 +84,25 @@ def actor_loader(specify="all"):
         return list(nns.values())[idx]
     elif type(specify) == int: return list(nns.values())[specify]
     else: raise InputError(f"keyword `specify` does not support {specify}.")
+
+def simulation_loader(specify, tpe, episode="random"):
+    seed = seed_order[specify]
+    print(f"Loading model {specify}, i.e. seed={seed}")
+    if episode == "random": episode = str(np.random.choice(240))
+    else: episode = str(episode)
+    print(f"Using episode {episode}")
+    files = nav.file_finder(target=[seed, tpe, episode], extension=".npy", parent_name=os.path.join(modelpath, "observations"))
+    tpe_full = param_finder(files[0], "tpe")
+    fname = f"seed={seed}_tpe={tpe_full}_episode={episode}.npy"
+
+    dic = {}
+    for item in ["observations", "actions", "activities_rnn", "activities_MLP1"]:
+        filepath = os.path.join(modelpath, item, fname)
+        dic[item] = np.load(filepath)
+
+    return dic
+
+# Development purposes
+if __name__ == "__main__":
+    dic = simulation_loader(0, "constant")
+    import pdb; pdb.set_trace()

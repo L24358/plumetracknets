@@ -37,7 +37,42 @@ def get_fixed_points(x, rnn, inn, br, bi, rp=100):
 def get_jacobians(x, rnn, inn, br, bi):
     fps = get_fixed_points(x, rnn, inn, br, bi)
     if len(fps) > 1: print(f"{x} obtained {len(fps)} fixed points!")
-    return [jacobian(fp, x, rnn, inn, br, bi) for fp in fps]
+    return [jacobian(fp, [x, rnn, inn, br, bi]) for fp in fps]
+
+def low_rank_approximation(rnn, r):
+    U, s, VT = np.linalg.svd(rnn)
+    S = np.zeros(rnn.shape)
+    np.fill_diagonal(S, s)
+    rrnn = U[:,:r] @ S[:r,:r] @ VT[:r,:]
+    return rrnn
+
+def polar_to_cartesian(actions, scale=np.pi):
+    r, theta = np.array(actions).T
+    x = r*np.cos(theta*scale)
+    y = r*np.sin(theta*scale)
+    return x, y
+
+def cartesian_to_polar(coors):
+    x, y = np.array(coors).T
+    r = np.sqrt(x**2 + y**2)
+    theta = np.arctan2(y, x)
+    return r, theta
+
+def get_rotation_matrix(coor): # clockwise
+    r, theta = cartesian_to_polar([coor])
+    theta = theta.item()
+    R = np.array([[np.cos(theta), -np.sin(theta)], [np.sin(theta), np.cos(theta)]])
+    return R
+
+def get_trajectory(actions):
+    x, y = polar_to_cartesian(actions)
+    coor = np.zeros((1,2))
+    for t in range(len(x)):
+        R = get_rotation_matrix(coor[-1])
+        v = np.array([x[t], y[t]])
+        new_coor = coor[-1] + R @ v
+        coor = np.vstack((coor, new_coor))
+    return coor
 
 def sim(Wh, Wc, br, bi, obs, h_0, **kwargs):
     kw = {"T": 100}
@@ -50,8 +85,23 @@ def sim(Wh, Wc, br, bi, obs, h_0, **kwargs):
     resy, rest = solver.solve(np.arange(0, kw["T"]))
     return rest, resy
 
+def sim_actor(Wh, Wc, br, bi, obs, h_0, specify, **kwargs):
+    kw = {"T": 100}
+    kw.update(kwargs)
+    rest, resy = sim(Wh, Wc, br, bi, obs, h_0, **kw)
+
+    dic = bcs.actor_loader(specify=specify)
+    actor = Actor()
+    actor.init_params(dic)
+    actions = actor(resy).squeeze().detach().numpy()
+    return rest, resy, actions
+
 def constant_obs(x_0):
     def inner(t): return np.array(x_0)
+    return inner
+
+def assigned_obs(x):
+    def inner(t): return x[t]
     return inner
 
 def init(module, weight_init, bias_init, gain=1):
