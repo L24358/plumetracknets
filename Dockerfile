@@ -1,6 +1,7 @@
 FROM belleliu/plumetracknets_intermediate
 RUN pip3 install pytest
 RUN pip3 install pysindy
+RUN pip3 install tensorflow
 
 COPY ./ /src
 

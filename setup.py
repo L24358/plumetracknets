@@ -17,3 +17,12 @@ setup(
     description='',
     packages=find_packages(exclude=[]),
 )
+
+setup(
+    name="aesindy",
+    version="0.0.0",
+    author="kpchamp",
+    author_email="",
+    description='',
+    packages=find_packages(exclude=[]),
+)

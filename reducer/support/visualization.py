@@ -2,6 +2,7 @@ import os
 import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
+import reducer.support.dynamics as dy
 from sklearn.decomposition import PCA
 from reducer.config import graphpath
 
@@ -34,12 +35,13 @@ def plot_trajectory(trajectory, figname="temp.png", save=True, plot_time=True, a
     @ Kwargs:
         - color: str, default="k"
     """
-    kw = {"color": "k"}
+    kw = {"color": "k", "xlabel": "x", "ylabel": "y", "subtitle": "Trajectory"}
     kw.update(kwargs)
 
     if ax == None: ax = plt.figure().add_subplot(111)
     if plot_time: color_time_2d(ax, *trajectory)
     else: ax.plot(*trajectory, alpha=0.5, color=kw["color"])
+    ax.set_xlabel(kw["xlabel"]); ax.set_ylabel(kw["ylabel"]); ax.set_title(kw["subtitle"])
     if save: savefig(figname)
 
 def plot_quantities(quantities, figname="temp.png", save=True, ax=None, **kwargs):
@@ -97,6 +99,43 @@ def plot_multiple_trajectory2(trajectories, figname="temp.png", save=True, plot_
 
     if save: savefig(figname, clear=False)
     return plt.gcf()
+
+def plot_multiple_quantities2(trajectories, figname="temp.png", save=True, override_N=None, **kwargs):
+    """
+    Plot `quantities` in multiple subplots of shape (N1, N2) = trajectories.shape.
+    @ Args:
+        - quantities: array-like, shape=(N1, N2, q), q=#quantities
+    """
+    N1 = len(trajectories); N2 = len(trajectories[0])
+    N = N1*N2 if override_N == None else override_N
+    kw = {"subtitle": [""]*N, "xlabel": ["time"]*N, "title": "", "color":["k"]*N}
+    kw.update(kwargs)
+
+    double = lambda x: [x, x]
+    fig = plt.figure(figsize=(N2*3, N1*3))
+    for c in range(N):
+        i, j = np.unravel_index(c, (N1, N2))
+        ax = fig.add_subplot(N1, N2, c+1)
+        plot_quantities(trajectories[i][j], save=False, ax=ax, xlabel=kw["xlabel"][c], subtitle=kw["subtitle"][c],\
+        color=double(kw["color"][c]), linestyle=["-", "--"]) # TODO: VERY temporary fix for color, linestyle
+
+    plt.suptitle(kw["title"])
+    if save: savefig(figname, clear=False)
+    return plt.gcf()
+
+def plot_obs_act_traj(actions, observations, figname="temp.png"):
+    fig = plt.figure(figsize=(9,3))
+    ax1 = fig.add_subplot(131)
+    plot_quantities(observations.T, save=False, ax=ax1, ylabel="value", subtitle="Observations", color=["k", "r", "b"], label=["C", "y", "x"])
+
+    ax2 = fig.add_subplot(132)
+    plot_quantities(actions.T, save=False, ax=ax2, ylabel="value", subtitle="Actions", color=["g", "m"], label=["r", "\u03B8"])
+
+    ax3 = fig.add_subplot(133)
+    traj = dy.get_trajectory(actions)
+    plot_trajectory(traj.T, save=False, ax=ax3)
+
+    savefig(figname=figname)
 
 ########################################################
 #                  Helper Functions                    #
