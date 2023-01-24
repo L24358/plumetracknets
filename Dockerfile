@@ -1,5 +1,6 @@
 FROM belleliu/plumetracknets_intermediate
 RUN pip3 install pytest
+RUN pip3 install pysindy
 
 COPY ./ /src
 
