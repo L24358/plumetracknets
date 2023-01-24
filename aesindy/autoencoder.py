@@ -1,5 +1,6 @@
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
 
+tf.disable_eager_execution()
 
 def full_network(params):
     """
@@ -25,11 +26,10 @@ def full_network(params):
 
     network = {}
 
-    tf.compat.v1.disable_eager_execution() ##
-    x = tf.compat.v1.placeholder(tf.float32, shape=[None, input_dim], name='x')
-    dx = tf.compat.v1.placeholder(tf.float32, shape=[None, input_dim], name='dx')
+    x = tf.placeholder(tf.float32, shape=[None, input_dim], name='x')
+    dx = tf.placeholder(tf.float32, shape=[None, input_dim], name='dx')
     if model_order == 2:
-        ddx = tf.compat.v1.placeholder(tf.float32, shape=[None, input_dim], name='ddx')
+        ddx = tf.placeholder(tf.float32, shape=[None, input_dim], name='ddx')
 
     if activation == 'linear':
         z, x_decode, encoder_weights, encoder_biases, decoder_weights, decoder_biases = linear_autoencoder(x, input_dim, latent_dim)
@@ -44,16 +44,16 @@ def full_network(params):
         Theta = sindy_library_tf_order2(z, dz, latent_dim, poly_order, include_sine)
 
     if params['coefficient_initialization'] == 'xavier':
-        sindy_coefficients = tf.compat.v1.get_variable('sindy_coefficients', shape=[library_dim,latent_dim], initializer=tf.contrib.layers.xavier_initializer())
+        sindy_coefficients = tf.get_variable('sindy_coefficients', shape=[library_dim,latent_dim], initializer=tf.contrib.layers.xavier_initializer())
     elif params['coefficient_initialization'] == 'specified':
-        sindy_coefficients = tf.compat.v1.get_variable('sindy_coefficients', initializer=params['init_coefficients'])
+        sindy_coefficients = tf.get_variable('sindy_coefficients', initializer=params['init_coefficients'])
     elif params['coefficient_initialization'] == 'constant':
-        sindy_coefficients = tf.compat.v1.get_variable('sindy_coefficients', shape=[library_dim,latent_dim], initializer=tf.constant_initializer(1.0))
+        sindy_coefficients = tf.get_variable('sindy_coefficients', shape=[library_dim,latent_dim], initializer=tf.constant_initializer(1.0))
     elif params['coefficient_initialization'] == 'normal':
-        sindy_coefficients = tf.compat.v1.get_variable('sindy_coefficients', shape=[library_dim,latent_dim], initializer=tf.initializers.random_normal())
+        sindy_coefficients = tf.get_variable('sindy_coefficients', shape=[library_dim,latent_dim], initializer=tf.initializers.random_normal())
     
     if params['sequential_thresholding']:
-        coefficient_mask = tf.compat.v1.placeholder(tf.float32, shape=[library_dim,latent_dim], name='coefficient_mask')
+        coefficient_mask = tf.placeholder(tf.float32, shape=[library_dim,latent_dim], name='coefficient_mask')
         sindy_predict = tf.matmul(Theta, coefficient_mask*sindy_coefficients)
         network['coefficient_mask'] = coefficient_mask
     else:
@@ -192,9 +192,9 @@ def build_network_layers(input, input_dim, output_dim, widths, activation, name)
     biases = []
     last_width=input_dim
     for i,n_units in enumerate(widths):
-        W = tf.compat.v1.get_variable(name+'_W'+str(i), shape=[last_width,n_units],
-            initializer=tf.keras.initializers.glorot_normal)
-        b = tf.compat.v1.get_variable(name+'_b'+str(i), shape=[n_units],
+        W = tf.get_variable(name+'_W'+str(i), shape=[last_width,n_units],
+            initializer=tf.keras.initializers.glorot_normal) ## Changed
+        b = tf.get_variable(name+'_b'+str(i), shape=[n_units],
             initializer=tf.constant_initializer(0.0))
         input = tf.matmul(input, W) + b
         if activation is not None:
@@ -202,9 +202,9 @@ def build_network_layers(input, input_dim, output_dim, widths, activation, name)
         last_width = n_units
         weights.append(W)
         biases.append(b)
-    W = tf.compat.v1.get_variable(name+'_W'+str(len(widths)), shape=[last_width,output_dim],
+    W = tf.get_variable(name+'_W'+str(len(widths)), shape=[last_width,output_dim],
         initializer=tf.keras.initializers.glorot_normal)
-    b = tf.compat.v1.get_variable(name+'_b'+str(len(widths)), shape=[output_dim],
+    b = tf.get_variable(name+'_b'+str(len(widths)), shape=[output_dim],
         initializer=tf.constant_initializer(0.0))
     input = tf.matmul(input,W) + b
     weights.append(W)

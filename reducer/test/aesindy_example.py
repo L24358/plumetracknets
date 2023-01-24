@@ -7,7 +7,7 @@ import numpy as np
 from aesindy.example_lorenz import get_lorenz_data
 from aesindy.sindy_utils import library_size
 from aesindy.training import train_network
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
 
 # generate training, validation, testing data
 noise_strength = 1e-6
@@ -49,7 +49,7 @@ params['print_progress'] = True
 params['print_frequency'] = 100
 
 # training time cutoffs
-params['max_epochs'] = 5001
+params['max_epochs'] = 1001
 params['refinement_epochs'] = 1001
 
 num_experiments = 1
@@ -61,7 +61,7 @@ for i in range(num_experiments):
 
     params['save_name'] = 'lorenz_' + datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S_%f")
 
-    tf.compat.v1.reset_default_graph()
+    tf.reset_default_graph()
 
     results_dict = train_network(training_data, validation_data, params)
     df = df.append({**results_dict, **params}, ignore_index=True)

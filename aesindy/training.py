@@ -1,5 +1,5 @@
 import numpy as np
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
 import pickle
 from aesindy.autoencoder import full_network, define_loss
 
@@ -8,12 +8,9 @@ def train_network(training_data, val_data, params):
     # SET UP NETWORK
     autoencoder_network = full_network(params)
     loss, losses, loss_refinement = define_loss(autoencoder_network, params)
-    learning_rate = tf.compat.v1.placeholder(tf.float32, name='learning_rate')
-
-    var_list = [autoencoder_network[var] for var in ['encoder_weights', 'encoder_biases', 'decoder_weights', 'decoder_biases']]
-
-    train_op = tf.train.AdamOptimizer(learning_rate=learning_rate).minimize(loss, var_list)
-    train_op_refinement = tf.train.AdamOptimizer(learning_rate=learning_rate).minimize(loss_refinement, var_list)
+    learning_rate = tf.placeholder(tf.float32, name='learning_rate')
+    train_op = tf.train.AdamOptimizer(learning_rate=learning_rate).minimize(loss)
+    train_op_refinement = tf.train.AdamOptimizer(learning_rate=learning_rate).minimize(loss_refinement)
     saver = tf.train.Saver(var_list=tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES))
 
     validation_dict = create_feed_dictionary(val_data, params, idxs=None)
