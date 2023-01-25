@@ -14,4 +14,6 @@ noise_strength = 1e-6
 training_data = get_lorenz_data(1024, noise_strength=noise_strength)
 validation_data = get_lorenz_data(20, noise_strength=noise_strength)
 
-import pdb; pdb.set_trace()
+print(training_data.keys())
+print(training_data["x"].shape)
+print(training_data["dx"].shape)

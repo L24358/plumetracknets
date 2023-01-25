@@ -25,3 +25,4 @@
     2. Loading agent: ppo.evalCli.py
     3. Create environment: ppo.a2c_ppo_acktr.envs.py
     4. Model definition: ppo.a2c_ppo_acktr.model.py
+    5. sindy library: aesindy.autoencoder.sindy_library_tf

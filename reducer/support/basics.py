@@ -7,6 +7,11 @@ from reducer.support.exceptions import TargetNotFoundError, AlgorithmError, Inpu
 
 seed_order = ['2760377', '3199993', '9781ba', '541058', '3307e9']
 
+def single_sine(t, A, f, phi, b, s):
+    return A*np.sin(f*t + phi) + b + s*t
+
+def constant(t, b): return np.ones(len(t))*b
+
 def param_finder(string, target, sep="_", sep2="="):
     params = string.split(sep)
     for pm in params:
@@ -85,6 +90,11 @@ def actor_loader(specify="all"):
     elif type(specify) == int: return list(nns.values())[specify]
     else: raise InputError(f"keyword `specify` does not support {specify}.")
 
+def fit_loader(specify, episode):
+    with open(os.path.join(modelpath, "fit", f"agent={specify+1}_episode={episode}_manual.pkl"), "rb") as f:
+        data = pickle.load(f)
+    return data
+
 def simulation_loader(specify, tpe, episode="random"):
     seed = seed_order[specify]
     print(f"Loading model {specify}, i.e. seed={seed}")
@@ -101,6 +111,16 @@ def simulation_loader(specify, tpe, episode="random"):
         dic[item] = np.load(filepath)
 
     return dic
+
+def train_val_split(datadic, p):
+    traindic, valdic = {}, {}
+    for key in datadic.keys():
+        N = len(datadic[key])
+        N_train = int(N*p)
+
+        traindic[key] = datadic[key][:N_train]
+        valdic[key] = datadic[key][N_train:]
+    return traindic, valdic
 
 # Development purposes
 if __name__ == "__main__":

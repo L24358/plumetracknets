@@ -104,6 +104,14 @@ def assigned_obs(x):
     def inner(t): return x[t]
     return inner
 
+def single_sine_obs(params):
+    def inner(t):
+        C = params["C"][1](t, *params["C"][0])
+        y = params["y"][1](t, *params["y"][0])
+        x = params["x"][1](t, *params["x"][0])
+        return np.array([C, y, x])
+    return inner
+
 def init(module, weight_init, bias_init, gain=1):
     weight_init(module.weight.data, gain=gain)
     bias_init(module.bias.data)
