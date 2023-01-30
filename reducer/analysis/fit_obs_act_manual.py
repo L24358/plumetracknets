@@ -6,6 +6,7 @@ Fit observations and actions to constant and oscillatory functions. (Manually)
 """
 
 import os
+import sys
 import pickle
 import numpy as np
 import reducer.support.basics as bcs
@@ -15,8 +16,8 @@ from scipy.optimize import differential_evolution
 from reducer.config import modelpath
 
 specify = 0
-episode = 65
-start, end = 25, -1
+episode = int(sys.argv[1])
+start, end = 0, -1
 
 sim_results = bcs.simulation_loader(specify, "constant", episode=episode)
 observations = sim_results["observations"]
@@ -44,24 +45,23 @@ def bounds(func):
 
 def eval_fit(target):
     dic = {}
-    funcs = [single_sine, constant, envelope_sine]
+    funcs = [single_sine, constant]
     for func in funcs:
         res = differential_evolution(MSE, bounds(func), args=(target, func))
         error = MSE(res.x, target, func)
         dic[error] = [res.x, func]
-    err_ss, err_c, err_es = list(dic.keys())
-    if err_es < err_ss/1.1: minn = err_es # discount factor for envelope
-    elif err_ss < err_c/1.5: minn = err_ss # discount factor for constant
+    err_ss, err_c = list(dic.keys())
+    if err_ss < err_c/1.5: minn = err_ss # discount factor for constant
     else: minn = err_c 
 
-    return dic[minn]
+    return *dic[minn], minn
 
 popts = {}
 quantities = ["C", "y", "x", "r", "theta"]
 trajs = [[[], [], []], [[], []]] # shape = (2, 3)
 for i in range(5):
-    popt, func = eval_fit(targets[i])
-    popts[quantities[i]] = [popt, func]
+    popt, func, err = eval_fit(targets[i])
+    popts[quantities[i]] = [popt, func, err]
     idx1, idx2 = np.unravel_index(i, (2, 3))
     trajs[idx1][idx2] = [targets[i], func(np.arange(len(targets[i])), *popt)]
 

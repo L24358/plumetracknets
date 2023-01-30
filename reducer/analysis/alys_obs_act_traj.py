@@ -16,10 +16,10 @@ import reducer.support.dynamics as dy
 import reducer.support.visualization as vis
 
 specify = 0
-episode = np.random.choice(240)
+for episode in range(240):
 
-sim_results = bcs.simulation_loader(specify, "constant", episode=episode)
-observations = sim_results["observations"]
-actions = sim_results["actions"]
+    sim_results = bcs.simulation_loader(specify, "constant", episode=episode)
+    observations = sim_results["observations"]
+    actions = sim_results["actions"]
 
-vis.plot_obs_act_traj(actions, observations, figname=f"obs-act-traj_agent={specify+1}_tpe=constant_episode={episode}.png")
+    vis.plot_obs_act_traj(actions, observations, figname=f"obs-act-traj/obs-act-traj_agent={specify+1}_tpe=constant_episode={episode}.png")

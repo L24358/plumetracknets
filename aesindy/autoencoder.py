@@ -1,3 +1,4 @@
+import numpy as np
 import tensorflow.compat.v1 as tf
 
 tf.disable_eager_execution()
@@ -38,7 +39,7 @@ def full_network(params):
     
     if model_order == 1:
         dz = z_derivative(x, dx, encoder_weights, encoder_biases, activation=activation)
-        Theta = sindy_library_tf(z, latent_dim, poly_order, include_sine)
+        Theta = sindy_library_tf(z, latent_dim, poly_order, include_sine, **params["external"]) # ADDED params["external"]
     else:
         dz,ddz = z_derivative_order2(x, dx, ddx, encoder_weights, encoder_biases, activation=activation)
         Theta = sindy_library_tf_order2(z, dz, latent_dim, poly_order, include_sine)
@@ -294,7 +295,7 @@ def build_network_layers(input, input_dim, output_dim, widths, activation, name)
 #     return input, weights, biases
 
 
-def sindy_library_tf(z, latent_dim, poly_order, include_sine=False):
+def sindy_library_tf(z, latent_dim, poly_order, include_sine=False, **kwargs): # ADDED kwargs
     """
     Build the SINDy library.
 
@@ -310,6 +311,9 @@ def sindy_library_tf(z, latent_dim, poly_order, include_sine=False):
         number of library functions. The number of library functions is determined by the number
         of state variables of the input, the polynomial order, and whether or not sines are included.
     """
+    kw = {"f": np.ones(3), "phi": np.zeros(3), "A": np.ones(3), "b": np.zeros(3), "include_external": False}
+    kw.update(kwargs)
+
     library = [tf.ones(tf.shape(z)[0])]
 
     for i in range(latent_dim):
@@ -344,6 +348,13 @@ def sindy_library_tf(z, latent_dim, poly_order, include_sine=False):
     if include_sine:
         for i in range(latent_dim):
             library.append(tf.sin(z[:,i]))
+
+    # Add external input
+    if kw["include_external"]:
+        t = z[:,-1]
+        for i in range(3):
+            f, phi, A, b = kw["f"][i], kw["phi"][i], kw["A"][i], kw["b"][i]
+            library.append(A*tf.math.cos(f*t + phi) + b)
 
     return tf.stack(library, axis=1)
 

@@ -12,6 +12,7 @@ import numpy as np
 import reducer.support.basics as bcs
 import reducer.support.dynamics as dy
 import reducer.support.visualization as vis
+from scipy.signal import stft
 from scipy.optimize import differential_evolution
 
 specify = 0

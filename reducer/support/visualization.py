@@ -1,4 +1,6 @@
 import os
+import tqdm
+import imageio
 import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
@@ -123,6 +125,30 @@ def plot_multiple_quantities2(trajectories, figname="temp.png", save=True, overr
     if save: savefig(figname, clear=False)
     return plt.gcf()
 
+def plot_multiple_hist2(trajectories, figname="temp.png", save=True, override_N=None, **kwargs):
+    """
+    Plot `quantities` in multiple subplots of shape (N1, N2) = trajectories.shape.
+    @ Args:
+        - quantities: array-like, shape=(N1, N2, q), q=#quantities
+    """
+    N1 = len(trajectories); N2 = len(trajectories[0])
+    N = N1*N2 if override_N == None else override_N
+    kw = {"subtitle": [""]*N, "xlabel": [""]*N, "ylabel": ["time"]*N, "title": "", "color":["k"]*N}
+    kw.update(kwargs)
+
+    fig = plt.figure(figsize=(N2*3, N1*3))
+    for c in range(N):
+        i, j = np.unravel_index(c, (N1, N2))
+        ax = fig.add_subplot(N1, N2, c+1)
+        ax.hist(trajectories[i][j])
+        ax.set_title(kw["subtitle"][c])
+        ax.set_xlabel(kw["xlabel"][c])
+        ax.set_ylabel(kw["ylabel"][c])
+
+    plt.suptitle(kw["title"])
+    if save: savefig(figname, clear=False)
+    return plt.gcf()
+
 def plot_obs_act_traj(actions, observations, figname="temp.png"):
     fig = plt.figure(figsize=(9,3))
     ax1 = fig.add_subplot(131)
@@ -136,6 +162,19 @@ def plot_obs_act_traj(actions, observations, figname="temp.png"):
     plot_trajectory(traj.T, save=False, ax=ax3)
 
     savefig(figname=figname)
+
+def gen_gif(gen_fig, foldername, ax, stall=5, angle1=30):
+    if not os.path.exists(os.path.join(graphpath, foldername)): os.mkdir(os.path.join(graphpath, foldername))
+    if gen_fig:
+        for angle in tqdm.tqdm(np.linspace(-180, 180, 20)):
+            ax.view_init(angle1, angle)
+            savefig(figname=f"{foldername}/{round(angle,0)}.png", clear=False)
+
+    images = []
+    for angle in tqdm.tqdm(np.linspace(-180, 180, 20)):
+        for _ in range(stall):
+            images.append(imageio.imread(os.path.join(graphpath, foldername, f"{round(angle,0)}.png")))
+    imageio.mimsave(os.path.join(graphpath, f"{foldername}.gif"), images)
 
 ########################################################
 #                  Helper Functions                    #

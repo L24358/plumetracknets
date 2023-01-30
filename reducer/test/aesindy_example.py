@@ -17,11 +17,17 @@ validation_data = get_lorenz_data(20, noise_strength=noise_strength)
 params = {}
 
 params['input_dim'] = 128
-params['latent_dim'] = 3
+params['latent_dim'] = 7 # CHANGED latent_dim from 3 to 7
 params['model_order'] = 1
 params['poly_order'] = 3
 params['include_sine'] = False
-params['library_dim'] = library_size(params['latent_dim'], params['poly_order'], params['include_sine'], True)
+params['library_dim'] = library_size(params['latent_dim'], params['poly_order'], params['include_sine'], True) + 3 # ADDED 3
+
+# ADDITIONAL params I added:
+params_external = {
+    "include_external": True,
+    }
+params["external"] = params_external
 
 # sequential thresholding parameters
 params['sequential_thresholding'] = True
@@ -29,6 +35,12 @@ params['coefficient_threshold'] = 0.1
 params['threshold_frequency'] = 500
 params['coefficient_mask'] = np.ones((params['library_dim'], params['latent_dim']))
 params['coefficient_initialization'] = 'constant'
+
+# RESET coefficient mask
+mask = np.ones((params['latent_dim'], params['library_dim'])) # Transposed
+mask[-4:, :] = np.zeros((4, params['library_dim'])) # for the external inputs
+mask[-4][-3] = mask[-3][-2] = mask[-2][-1] = mask[-1][0] = 1 # for C, y, x, t
+params['coefficient_mask'] = mask.T
 
 # loss function weighting
 params['loss_weight_decoder'] = 1.0

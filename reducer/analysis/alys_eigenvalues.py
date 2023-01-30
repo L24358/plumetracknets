@@ -68,7 +68,6 @@ location = np.where(df_sub["unstable"])[0]
 fig = plt.figure(figsize=(4, 4))
 idx_sort = list(np.argsort(abs(proj)))
 
-# import pdb; pdb.set_trace()
 plt.plot(np.array(abs(proj))[idx_sort], "b.")
 plt.plot([idx_sort.index(loc) for loc in location],
         abs(proj_unstable), "r.")
@@ -76,4 +75,3 @@ plt.savefig(os.path.join(graphpath, "temp.png"))
 
 print(df_unstable)
 print(abs(proj_unstable))
-# import pdb; pdb.set_trace()

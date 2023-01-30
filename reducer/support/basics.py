@@ -10,7 +10,16 @@ seed_order = ['2760377', '3199993', '9781ba', '541058', '3307e9']
 def single_sine(t, A, f, phi, b, s):
     return A*np.sin(f*t + phi) + b + s*t
 
+def envelope_sine(t, A, f_slow, phi_slow, f_fast, phi_fast, b, s):
+    return A*np.sin(f_slow*t + phi_slow)*np.sin(f_fast*t + phi_fast) + b + s*t
+
 def constant(t, b): return np.ones(len(t))*b
+
+def combine_dict(d1, d2):
+    return {
+        k: tuple(d[k] for d in (d1, d2) if k in d)
+        for k in set(d1.keys()) | set(d2.keys())
+    }
 
 def param_finder(string, target, sep="_", sep2="="):
     params = string.split(sep)
