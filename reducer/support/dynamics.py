@@ -1,3 +1,5 @@
+import os
+import pickle
 import torch
 import numpy as np
 import torch.nn as nn
@@ -5,6 +7,7 @@ import reducer.support.basics as bcs
 from scipy.optimize import fsolve
 from reducer.support.exceptions import AlgorithmError
 from reducer.support.odesolver import Discrete
+from reducer.config import modelpath
 
 def rhs(h, args):
     x, rnn, inn, br, bi = args
@@ -116,6 +119,33 @@ def init(module, weight_init, bias_init, gain=1):
     weight_init(module.weight.data, gain=gain)
     bias_init(module.bias.data)
     return module
+
+def generate_single_trial(specify, episode, T, rp):
+    rnn, inn, br, bi = bcs.model_loader(specify=specify)
+    with open(os.path.join(modelpath, "fit", f"agent={specify+1}_episode={episode}_manual.pkl"), "rb") as f: dic = pickle.load(f)
+    t = np.arange(T+1)
+    C = dic["C"][1](t, *dic["C"][0])
+    y = dic["y"][1](t, *dic["y"][0])
+    x = dic["x"][1](t, *dic["x"][0])
+    observations = np.vstack((C, y, x)).T
+
+    keys = ["C", "y", "x"]
+    As = [dic[k][0][0] for k in keys]
+    fs = [dic[k][0][1] for k in keys]
+    phis = [dic[k][0][2] for k in keys]
+    bs = [dic[k][0][3] for k in keys]
+
+    y_rnns = []
+    for _ in range(rp):
+        h_0 = np.random.uniform(low=-1, high=1, size=(64,))
+        _, y_rnn = sim(rnn, inn, br, bi, assigned_obs(observations), h_0, T=T+1)
+        y_rnns.append(y_rnn[1:])
+    y_rnns = np.vstack(y_rnns)
+
+    var = np.hstack([y_rnns, np.tile(observations, (rp, 1)), np.tile(t, rp).reshape(-1, 1)])
+    dvar = var[1:] - var[:-1]
+    dic = {"t": t, "x": var[1:], 'dx': dvar, "f": fs, "phi": phis, "A": As, "b": bs}
+    return dic
 
 class AddBias(nn.Module):
     def __init__(self, bias):

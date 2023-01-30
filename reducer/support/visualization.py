@@ -37,7 +37,7 @@ def plot_trajectory(trajectory, figname="temp.png", save=True, plot_time=True, a
     @ Kwargs:
         - color: str, default="k"
     """
-    kw = {"color": "k", "xlabel": "x", "ylabel": "y", "subtitle": "Trajectory"}
+    kw = {"color": "k", "xlabel": "x", "ylabel": "y", "subtitle": ""}
     kw.update(kwargs)
 
     if ax == None: ax = plt.figure().add_subplot(111)
