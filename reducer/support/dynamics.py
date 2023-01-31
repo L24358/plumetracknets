@@ -8,6 +8,7 @@ from scipy.optimize import fsolve
 from reducer.support.exceptions import AlgorithmError
 from reducer.support.odesolver import Discrete
 from reducer.config import modelpath
+from reducer.support.basics import single_sine, constant
 
 def rhs(h, args):
     x, rnn, inn, br, bi = args
@@ -142,7 +143,8 @@ def generate_single_trial(specify, episode, T, rp):
         y_rnns.append(y_rnn[1:])
     y_rnns = np.vstack(y_rnns)
 
-    var = np.hstack([y_rnns, np.tile(observations, (rp, 1)), np.tile(t, rp).reshape(-1, 1)])
+    # var = np.hstack([y_rnns, np.tile(observations, (rp, 1)), np.tile(t, rp).reshape(-1, 1)])
+    var = y_rnns # TODO: fix
     dvar = var[1:] - var[:-1]
     dic = {"t": t, "x": var[1:], 'dx': dvar, "f": fs, "phi": phis, "A": As, "b": bs}
     return dic

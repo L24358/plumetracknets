@@ -56,7 +56,7 @@ class Policy(nn.Module):
         raise NotImplementedError
 
     def act(self, inputs, rnn_hxs, masks, deterministic=False):
-        value, actor_features, rnn_hxs, activities = self.base(inputs, rnn_hxs, masks)
+        value, actor_features, rnn_hxs, activities = self.base(inputs, rnn_hxs, masks) # MLPbase
         dist = self.dist(actor_features)
 
         if deterministic:

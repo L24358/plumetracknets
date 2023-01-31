@@ -4,55 +4,49 @@ import os
 import datetime
 import pandas as pd
 import numpy as np
-from aesindy.example_lorenz import get_lorenz_data
-from aesindy.sindy_utils import library_size
-from aesindy.training import train_network
-import tensorflow.compat.v1 as tf
-
 import reducer.support.dynamics as dy
-from reducer.support.basics import single_sine, constant
-
-# hyperparameters
-specify = 0
-episode = 5
-T = 128
-rp = 1000
-
-# generate training, validation, testing data
-training_data = dy.generate_single_trial(specify, episode, T, rp)
-validation_data = dy.generate_single_trial(specify, episode, T, 200)
+from aesindy.example_lorenz import get_lorenz_data # TODO: replace
+from aesindyc.sindy_utils import library_size
+from aesindyc.training import train_network
+import tensorflow.compat.v1 as tf
 
 params = {}
 
-params['input_dim'] = 64 + 4
-params['latent_dim'] = 5 + 4
-params['model_order'] = 1
-params['poly_order'] = 2
-params['include_sine'] = False
-params['library_dim'] = library_size(params['latent_dim'], params['poly_order'], params['include_sine'], True) + 3
+# generate training, validation, testing data
+noise_strength = 1e-6
+training_data = get_lorenz_data(1024, noise_strength=noise_strength)
+validation_data = get_lorenz_data(20, noise_strength=noise_strength)
 
-# ADDITIONAL params I added:
-params_external = {
-    "include_external": True,
-    "f": training_data["f"],
-    "phi": training_data["phi"],
-    "A": training_data["A"],
-    "b": training_data["b"],
-    }
-params["external"] = params_external
+# NEW: ptn data
+specify, episode, T, rp = 0, 5, 128, 1000
+training_data = dy.generate_single_trial(specify, episode, T, rp)
+validation_data = dy.generate_single_trial(specify, episode, T, 200)
+
+# NEW: temporarily generate u(t) # TODO: fix
+def gen_temp_u(N):
+    t = np.arange(N)
+    u = [np.sin(t), np.sin(2*t), np.sin(3*t)]
+    u = np.vstack(u).T
+    return u
+training_data['u'] = gen_temp_u(training_data['x'].shape[0])
+validation_data['u'] = gen_temp_u(validation_data['x'].shape[0])
+
+# NEW: control dimensions
+params['ctrl_dim'] = 3
+
+params['input_dim'] = 64 # NEW
+params['latent_dim'] = 3
+params['model_order'] = 1
+params['poly_order'] = 3
+params['include_sine'] = False
+params['library_dim'] = library_size(params['latent_dim'] + params['ctrl_dim'], params['poly_order'], params['include_sine'], True) # NEW
 
 # sequential thresholding parameters
 params['sequential_thresholding'] = True
-params['coefficient_threshold'] = 0.5
-params['threshold_frequency'] = 200
+params['coefficient_threshold'] = 0.1
+params['threshold_frequency'] = 500
 params['coefficient_mask'] = np.ones((params['library_dim'], params['latent_dim']))
 params['coefficient_initialization'] = 'constant'
-
-# RESET coefficient mask
-mask = np.ones((params['latent_dim'], params['library_dim'])) # Transposed
-mask[-4:, :] = np.zeros((4, params['library_dim'])) # for the external inputs
-mask[-4][-3] = mask[-3][-2] = mask[-2][-1] = mask[-1][0] = 1 # for C, y, x, t
-params['coefficient_mask'] = mask.T
 
 # loss function weighting
 params['loss_weight_decoder'] = 1.0
@@ -65,7 +59,7 @@ params['widths'] = [64,32]
 
 # training parameters
 params['epoch_size'] = training_data['x'].shape[0]
-params['batch_size'] = rp
+params['batch_size'] = 1024
 params['learning_rate'] = 1e-3
 
 params['data_path'] = os.getcwd() + '/'
@@ -73,8 +67,8 @@ params['print_progress'] = True
 params['print_frequency'] = 100
 
 # training time cutoffs
-params['max_epochs'] = 1201
-params['refinement_epochs'] = 501
+params['max_epochs'] = 1001
+params['refinement_epochs'] = 1001
 
 num_experiments = 1
 df = pd.DataFrame()
