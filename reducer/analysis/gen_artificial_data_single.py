@@ -1,3 +1,7 @@
+'''
+Generate artificial stimulus using fitted parameters from a single trial.
+'''
+
 import os
 import sys
 import pickle

@@ -1,3 +1,7 @@
+'''
+Generate artificial data based on the statistics of fitted trials.
+'''
+
 import os
 import sys
 import pickle

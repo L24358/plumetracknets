@@ -1,3 +1,9 @@
+'''
+Analysis of:
+        - 1. Eigenvalues of the recurrent matrix W_r
+        - 2. dot(eigenvectors, input matrix columns)
+'''
+
 import os
 import numpy as np
 import pandas as pd
@@ -8,6 +14,8 @@ import reducer.support.navigator as nav
 import reducer.support.visualization as vis
 from reducer.config import modelpath, graphpath
 
+########## Part 1 ##########
+
 # plot eigenvalues for recurrent matrix
 modelnames = nav.file_finder(
         target="weight_hh",
@@ -16,7 +24,8 @@ modelnames = nav.file_finder(
 
 fig = plt.figure(figsize=(20, 4))
 
-df = pd.DataFrame() # modelidx, evalue, if unstable, eigenvector
+# collect info about eigenvalue, eigenvector and stability
+df = pd.DataFrame() # columns: modelidx, evalue, if unstable, eigenvector
 for i in range(5):
     rnn = np.load(modelnames[i])
     ev, ew = np.linalg.eig(rnn)
@@ -43,6 +52,8 @@ plt.tight_layout()
 plt.savefig(os.path.join(graphpath, "eigenvalue on unit circle.png"), dpi=200)
 plt.clf()
 
+########## Part 2 ##########
+
 # load input matrix
 modelnames = nav.file_finder(
         target="weight_ih",
@@ -59,7 +70,8 @@ for _, row in df.iterrows():
     new_row = row.append(proj_row)
     df_proj = df_proj.append(new_row, ignore_index=True)
 
-inp = "proj2"
+# plot dot product
+inp = "proj2" # which projection to plot
 df_sub = df_proj[df["modelidx"] == 2]
 df_unstable = df_sub[df_sub["unstable"]]
 proj = df_sub[inp]

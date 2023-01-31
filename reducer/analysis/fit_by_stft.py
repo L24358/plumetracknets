@@ -1,3 +1,7 @@
+'''
+Fit trials with short term Fourier transform.
+'''
+
 import os
 import sys
 import pickle

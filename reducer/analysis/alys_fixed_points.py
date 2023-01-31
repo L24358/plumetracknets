@@ -1,3 +1,7 @@
+'''
+Plot fixed points in terms of the instantaneous inputs.
+'''
+
 import os
 import pickle
 import numpy as np
@@ -17,10 +21,10 @@ specify = 0
 episode = 82
 
 # Load model
-rnn, inn, br, bi = bcs.model_loader(specify=specify) # Take the first model
+rnn, inn, br, bi = bcs.model_loader(specify=specify) 
 
 # Load and plot trajectories
-if use_simulation:
+if use_simulation: # Use artificial input and simulated results
     sim_results = bcs.simulation_loader(specify, "constant", episode=episode)
     h_0 = sim_results["activities_rnn"][0]
 
@@ -31,16 +35,16 @@ if use_simulation:
     x = dic["x"][1](T, *dic["x"][0])
     observations = np.vstack((C, y, x)).T
     _, trajs = dy.sim(rnn, inn, br, bi, dy.assigned_obs(observations), h_0, T=100)
-else:
+else: # use real input and results
     trajs = []
     sim_results = bcs.simulation_loader(specify, "constant", episode=episode)
     observations = sim_results["observations"]
     trajs = sim_results["activities_rnn"]
 
-if use_alltrajs:
+if use_alltrajs: # plot all trajectories as reference
     trajs = np.load(os.path.join(modelpath, "activities_rnn", f"alltrajs_agent={specify+1}.npy"))
 
-# Perform PCA
+# Perform PCA on trajectories
 pca = PCA(n_components=3)
 y_pca = pca.fit_transform(trajs)
 ax = plt.figure().add_subplot(projection="3d")

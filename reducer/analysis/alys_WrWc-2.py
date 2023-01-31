@@ -1,3 +1,10 @@
+'''
+Analysis of:
+    - 1. Eigenvalue spectrum of recurrent matrix
+    - 2. Connection weights of input matrix
+    - 3. Hierarchical clustering of recurrent matrix
+'''
+
 import os
 import numpy as np
 import seaborn as sns

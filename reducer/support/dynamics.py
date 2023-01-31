@@ -8,7 +8,6 @@ from scipy.optimize import fsolve
 from reducer.support.exceptions import AlgorithmError
 from reducer.support.odesolver import Discrete
 from reducer.config import modelpath
-from reducer.support.basics import single_sine, constant
 
 def rhs(h, args):
     x, rnn, inn, br, bi = args

@@ -1,3 +1,7 @@
+'''
+Simulate actions of reduced matrix.
+'''
+
 import numpy as np
 import reducer.support.basics as bcs
 import reducer.support.dynamics as dy

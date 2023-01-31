@@ -1,3 +1,7 @@
+'''
+Verify the artificial (fitted) stimulus.
+'''
+
 import numpy as np
 import reducer.support.basics as bcs
 import reducer.support.dynamics as dy

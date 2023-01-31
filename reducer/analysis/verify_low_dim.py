@@ -1,3 +1,8 @@
+'''
+Verify that the model indeed generates low dimensional neuronal activity.
+Plot the PCA results.
+'''
+
 import os
 import numpy as np
 import matplotlib.pyplot as plt

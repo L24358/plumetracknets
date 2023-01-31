@@ -1,3 +1,7 @@
+'''
+Check if the matrix is close to operating in the linear regime.
+'''
+
 import numpy as np
 import reducer.support.basics as bcs
 import reducer.support.dynamics as dy
@@ -19,6 +23,6 @@ def sweep_observations(n, rnn, inn, br, bi):
     return is_linear
 
 if __name__ == "__main__":
-    rnn, inn, br, bi = bcs.model_loader(specify=0) # Take the first model
+    rnn, inn, br, bi = bcs.model_loader(specify=0) 
     is_linear = sweep_observations(5, rnn, inn, br, bi)
     print(is_linear)

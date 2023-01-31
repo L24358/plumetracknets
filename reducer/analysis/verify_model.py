@@ -1,3 +1,7 @@
+'''
+Verify that the neuronal activities are similar given the same input.
+'''
+
 import reducer.support.basics as bcs
 import reducer.support.dynamics as dy
 import reducer.support.visualization as vis
