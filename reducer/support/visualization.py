@@ -9,7 +9,7 @@ from sklearn.decomposition import PCA
 from reducer.config import graphpath
 
 ########################################################
-#                    Main Functions                    #
+#                     Plot Singles                     #
 ########################################################
 
 def plot_PCA_3d(data, figname="temp.png", save=True, plot_time=True):
@@ -60,6 +60,10 @@ def plot_quantities(quantities, figname="temp.png", save=True, ax=None, **kwargs
         ax.set_xlabel(kw["xlabel"]); ax.set_ylabel(kw["ylabel"]); ax.set_title(kw["subtitle"])
         if not (kw["label"] == [""]*Q): ax.legend()
     if save: savefig(figname)
+
+########################################################
+#                    Plot Multiples                    #
+########################################################
 
 def plot_multiple_trajectory(trajectories, figname="temp.png", save=True, plot_time=True, **kwargs):
     """
@@ -148,6 +152,10 @@ def plot_multiple_hist2(trajectories, figname="temp.png", save=True, override_N=
     plt.suptitle(kw["title"])
     if save: savefig(figname, clear=False)
     return plt.gcf()
+
+########################################################
+#                   Plot Specifics                     #
+########################################################
 
 def plot_obs_act_traj(actions, observations, figname="temp.png"):
     fig = plt.figure(figsize=(9,3))

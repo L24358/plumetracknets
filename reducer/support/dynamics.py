@@ -9,21 +9,31 @@ from reducer.support.exceptions import AlgorithmError
 from reducer.support.odesolver import Discrete
 from reducer.config import modelpath
 
+########################################################
+#                  Fixed Point Related                 #
+########################################################
+
 def rhs(h, args):
+    '''rhs - lhs of the RNN, i.e. tanh(...) - h = 0.'''
     x, rnn, inn, br, bi = args
     return np.tanh(rnn @ h + inn @ x + br + bi) - h
 
 def jacobian(h, args):
+    '''Jacobian of the RNN.'''
     x, rnn, inn, br, bi = args
     inner = rnn @ h + inn @ x  + br + bi
     return np.diag((1 - pow(np.tanh(inner), 2))) @ rnn
 
 def jacobian_rhs(h, args):
+    '''Jacobian of the rhs of the RNN.'''
     return jacobian(h, args) - np.identity(64)
 
-def check_fixed_point(fp): return np.all([abs(c) <= 1 for c in fp])
+def check_fixed_point(fp):
+    '''Check if fixed point is stable.'''
+    return np.all([abs(c) <= 1 for c in fp])
 
 def get_fixed_points(x, rnn, inn, br, bi, rp=100):
+    '''Obtain fixed points, with #rp random initial values.'''
     fps = []
     for _ in range(rp):
         h_0 = np.random.uniform(low=-1, high=1, size=64)
@@ -38,9 +48,14 @@ def get_fixed_points(x, rnn, inn, br, bi, rp=100):
     return fps
 
 def get_jacobians(x, rnn, inn, br, bi):
+    '''Obtain Jacobian of all the fixed points.'''
     fps = get_fixed_points(x, rnn, inn, br, bi)
     if len(fps) > 1: print(f"{x} obtained {len(fps)} fixed points!")
     return [jacobian(fp, [x, rnn, inn, br, bi]) for fp in fps]
+
+########################################################
+#               Matrix Numerical Methods               #
+########################################################
 
 def low_rank_approximation(rnn, r):
     U, s, VT = np.linalg.svd(rnn)
@@ -48,6 +63,10 @@ def low_rank_approximation(rnn, r):
     np.fill_diagonal(S, s)
     rrnn = U[:,:r] @ S[:r,:r] @ VT[:r,:]
     return rrnn
+
+########################################################
+#                  Simulation Related                  #
+########################################################
 
 def polar_to_cartesian(actions, scale=np.pi):
     r, theta = np.array(actions).T
@@ -61,13 +80,20 @@ def cartesian_to_polar(coors):
     theta = np.arctan2(y, x)
     return r, theta
 
-def get_rotation_matrix(coor): # clockwise
+def get_rotation_matrix(coor): # clockwise?
     r, theta = cartesian_to_polar([coor])
     theta = theta.item()
     R = np.array([[np.cos(theta), -np.sin(theta)], [np.sin(theta), np.cos(theta)]])
     return R
 
 def get_trajectory(actions):
+    '''
+    Get (x, y) trajectory from actions.
+    @ Args:
+        - actions: np.ndarray, shape = (#T, 2)
+    @ Returns:
+        - coor: np.ndarray, shape = (#T, 2)
+    '''
     x, y = polar_to_cartesian(actions)
     coor = np.zeros((1,2))
     for t in range(len(x)):
@@ -78,6 +104,12 @@ def get_trajectory(actions):
     return coor
 
 def sim(Wh, Wc, br, bi, obs, h_0, **kwargs):
+    '''
+    Simulates the RNN.
+    @ Returns:
+        - rest: np.ndarray, time points, shape = (#T,)
+        - resy: np.ndarray, variables, shape = (#T, #vars)
+    '''
     kw = {"T": 100}
     kw.update(kwargs)
 
@@ -89,6 +121,13 @@ def sim(Wh, Wc, br, bi, obs, h_0, **kwargs):
     return rest, resy
 
 def sim_actor(Wh, Wc, br, bi, obs, h_0, specify, **kwargs):
+    '''
+    Simulates the RNN plus the actor.
+    @ Returns:
+        - rest: np.ndarray, time points, shape = (#T,)
+        - resy: np.ndarray, variables, shape = (#T, #vars)
+        - actions: np.ndarray, actions, shape = (#T, 2)
+    '''
     kw = {"T": 100}
     kw.update(kwargs)
     rest, resy = sim(Wh, Wc, br, bi, obs, h_0, **kw)
@@ -100,14 +139,17 @@ def sim_actor(Wh, Wc, br, bi, obs, h_0, specify, **kwargs):
     return rest, resy, actions
 
 def constant_obs(x_0):
+    '''Constant input to the RNN.'''
     def inner(t): return np.array(x_0)
     return inner
 
 def assigned_obs(x):
+    '''Assigned input to the RNN.'''
     def inner(t): return x[t]
     return inner
 
 def single_sine_obs(params):
+    '''Single sine wave input to the RNN.'''
     def inner(t):
         C = params["C"][1](t, *params["C"][0])
         y = params["y"][1](t, *params["y"][0])
@@ -115,12 +157,8 @@ def single_sine_obs(params):
         return np.array([C, y, x])
     return inner
 
-def init(module, weight_init, bias_init, gain=1):
-    weight_init(module.weight.data, gain=gain)
-    bias_init(module.bias.data)
-    return module
-
 def generate_single_trial(specify, episode, T, rp):
+    '''UNFINISHED.'''
     rnn, inn, br, bi = bcs.model_loader(specify=specify)
     with open(os.path.join(modelpath, "fit", f"agent={specify+1}_episode={episode}_manual.pkl"), "rb") as f: dic = pickle.load(f)
     t = np.arange(T+1)
@@ -142,11 +180,16 @@ def generate_single_trial(specify, episode, T, rp):
         y_rnns.append(y_rnn[1:])
     y_rnns = np.vstack(y_rnns)
 
-    # var = np.hstack([y_rnns, np.tile(observations, (rp, 1)), np.tile(t, rp).reshape(-1, 1)])
-    var = y_rnns # TODO: fix
+    t_tiled = np.tile(t, rp).reshape(-1, 1)
+    u = np.tile(observations, (rp, 1))
+    var = y_rnns
     dvar = var[1:] - var[:-1]
-    dic = {"t": t, "x": var[1:], 'dx': dvar, "f": fs, "phi": phis, "A": As, "b": bs}
+    dic = {"t": t_tiled, "x": var[1:], 'dx': dvar, "u": u}
     return dic
+
+########################################################
+#             Actor (code from satsingh)               #
+########################################################
 
 class AddBias(nn.Module):
     def __init__(self, bias):
@@ -214,3 +257,8 @@ class Actor(nn.Module):
         y = self.actor(h)
         dist = self.dist(y)
         return dist.mode()
+
+def init(module, weight_init, bias_init, gain=1):
+    weight_init(module.weight.data, gain=gain)
+    bias_init(module.bias.data)
+    return module

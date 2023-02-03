@@ -25,7 +25,7 @@ for i in range(240):
 trajs = np.vstack(trajs)
 
 # save trajectories
-if 1:
+if 0:
     np.save(os.path.join(modelpath, "activities_rnn", f"alltrajs_agent={specify+1}.npy"), trajs)
     import pdb; pdb.set_trace()
 

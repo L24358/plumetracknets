@@ -1,6 +1,12 @@
-@ 20230119 TTD:
+@ 20230201 AESINDY-c TTD:
+    1. Make sure that AESINDY-c runs on A=0 sine wave input, and that the results are correct.
+    2. See if AESINDY-c runs on A!=0 sine wave input, by slowly increasing/decreasing A.
+    3. See if AESINDY-c runs on ptn simulated data, with constant input.
+    4. See if AESINDY-c runs on ptn simulated data, with oscillatory input.
+    5. Use PCA on SINDY-c (install pysindy)
+
+@ 20230119 Dynamical systems analysis TTD:
     1. What are the fixed points and Jacobian of this system? (What do the eigenvectors of the connectivity matrix mean)
-    2. 
 
 @ 20230118 Observations / Results:
     1. Two input projections strongly project to one of the unstable eigenvectors.

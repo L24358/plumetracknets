@@ -39,7 +39,7 @@ def full_network(params):
     
     if model_order == 1:
         dz = z_derivative(x, dx, encoder_weights, encoder_biases, activation=activation)
-        Theta = sindy_library_tf(z, latent_dim, poly_order, include_sine, **params["external"]) # ADDED params["external"]
+        Theta = sindy_library_tf(z, latent_dim, poly_order, include_sine) # ADDED params["external"]
     else:
         dz,ddz = z_derivative_order2(x, dx, ddx, encoder_weights, encoder_biases, activation=activation)
         Theta = sindy_library_tf_order2(z, dz, latent_dim, poly_order, include_sine)
@@ -350,11 +350,11 @@ def sindy_library_tf(z, latent_dim, poly_order, include_sine=False, **kwargs): #
             library.append(tf.sin(z[:,i]))
 
     # Add external input
-    if kw["include_external"]:
-        t = z[:,-1]
-        for i in range(3):
-            f, phi, A, b = kw["f"][i], kw["phi"][i], kw["A"][i], kw["b"][i]
-            library.append(A*tf.math.cos(f*t + phi) + b)
+    # if kw["include_external"]:
+    #     t = z[:,-1]
+    #     for i in range(3):
+    #         f, phi, A, b = kw["f"][i], kw["phi"][i], kw["A"][i], kw["b"][i]
+    #         library.append(A*tf.math.cos(f*t + phi) + b)
 
     return tf.stack(library, axis=1)
 

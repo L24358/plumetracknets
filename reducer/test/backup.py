@@ -70,3 +70,6 @@ for key in keys:
     counts = np.expand_dims(np.asarray(data[(single_sine, key)]).T, axis=0)
     vis.plot_multiple_hist2(counts, figname="temp.png", subtitle=["A","f","phi","b","s"], ylabel=["count"]*5, title=key)
 
+def dummy(func): return func(y)
+funcs = build_rhs_poly3_wsine(coefs, mask, total_dim)
+rhs = sum(list(map(dummy, funcs)))

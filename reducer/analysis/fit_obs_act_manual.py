@@ -13,6 +13,7 @@ import reducer.support.basics as bcs
 import reducer.support.dynamics as dy
 import reducer.support.visualization as vis
 from scipy.optimize import differential_evolution
+from reducer.support.basics import constant, single_sine, envelope_sine
 from reducer.config import modelpath
 
 specify = 0
@@ -24,14 +25,6 @@ observations = sim_results["observations"]
 actions = sim_results["actions"]
 targets = np.hstack((observations, actions))[start: end]
 targets = targets.T
-
-def constant(t, b): return np.ones(len(t))*b
-
-def single_sine(t, A, f, phi, b, s):
-    return A*np.sin(f*t + phi) + b + s*t
-
-def envelope_sine(t, A, f_slow, phi_slow, f_fast, phi_fast, b, s):
-    return A*np.sin(f_slow*t + phi_slow)*np.sin(f_fast*t + phi_fast) + b + s*t
 
 def MSE(popts, *args):
     target, func = args    
@@ -59,9 +52,10 @@ def eval_fit(target):
 popts = {}
 quantities = ["C", "y", "x", "r", "theta"]
 trajs = [[[], [], []], [[], []]] # shape = (2, 3)
+fitfuncs = bcs.FitFuncs()
 for i in range(5):
     popt, func, err = eval_fit(targets[i])
-    popts[quantities[i]] = [popt, func, err]
+    popts[quantities[i]] = [popt, fitfuncs(funcs, reverse=True), err]
     idx1, idx2 = np.unravel_index(i, (2, 3))
     trajs[idx1][idx2] = [targets[i], func(np.arange(len(targets[i])), *popt)]
 
