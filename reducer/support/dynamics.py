@@ -29,7 +29,7 @@ def jacobian_rhs(h, args):
     return jacobian(h, args) - np.identity(64)
 
 def check_fixed_point(fp):
-    '''Check if fixed point is stable.'''
+    '''Check if fixed point is between -1 and 1 (because of tanh).'''
     return np.all([abs(c) <= 1 for c in fp])
 
 def get_fixed_points(x, rnn, inn, br, bi, rp=100):
@@ -37,9 +37,10 @@ def get_fixed_points(x, rnn, inn, br, bi, rp=100):
     fps = []
     for _ in range(rp):
         h_0 = np.random.uniform(low=-1, high=1, size=64)
-        fp, infodic, ier = fsolve(rhs, h_0, args=[x, rnn, inn, br, bi], fprime=jacobian_rhs, xtol=1e-15, full_output=True)[:3]
+        fp, infodic, ier = fsolve(rhs, h_0, args=[x, rnn, inn, br, bi], xtol=1e-15, full_output=True)[:3]
+        # fprime=jacobian_rhs
 
-        flag = (abs(np.mean(infodic["fvec"])) <= 1e-7) and ier
+        flag = (abs(np.mean(infodic["fvec"])) <= 1e-15) and ier
         for ref in fps:
             if not bcs.different(fp, ref)[0]: flag = False; break
         if flag: fps.append(fp)
@@ -52,6 +53,12 @@ def get_jacobians(x, rnn, inn, br, bi):
     fps = get_fixed_points(x, rnn, inn, br, bi)
     if len(fps) > 1: print(f"{x} obtained {len(fps)} fixed points!")
     return [jacobian(fp, [x, rnn, inn, br, bi]) for fp in fps]
+
+def get_stability(fp, args):
+    J = jacobian(fp, args)
+    evs = np.linalg.eigvals(J)
+    stable = np.all(abs(evs) < 1)
+    return stable
 
 ########################################################
 #               Matrix Numerical Methods               #

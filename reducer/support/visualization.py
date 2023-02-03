@@ -37,14 +37,17 @@ def plot_trajectory(trajectory, figname="temp.png", save=True, plot_time=True, a
     @ Kwargs:
         - color: str, default="k"
     """
-    kw = {"color": "k", "xlabel": "x", "ylabel": "y", "subtitle": ""}
+    kw = {"color": "k", "xlabel": "x", "ylabel": "y", "subtitle": "", "projection": "2d"}
     kw.update(kwargs)
+    projection = kw["projection"]
 
-    if ax == None: ax = plt.figure().add_subplot(111)
-    if plot_time: color_time_2d(ax, *trajectory)
+    if ax == None: ax = plt.figure().add_subplot(111, projection=projection)
+    if plot_time and projection == "2d": color_time_2d(ax, *trajectory)
+    elif plot_time and projection == "3d": color_time_3d(ax, *trajectory)
     else: ax.plot(*trajectory, alpha=0.5, color=kw["color"])
     ax.set_xlabel(kw["xlabel"]); ax.set_ylabel(kw["ylabel"]); ax.set_title(kw["subtitle"])
     if save: savefig(figname)
+    return ax
 
 def plot_quantities(quantities, figname="temp.png", save=True, ax=None, **kwargs):
     """
@@ -226,9 +229,9 @@ def common_col_title(fig, titles, shape):
         ax.set_title(titles[n])
     return fig
 
-def savefig(figname="temp.png", clear=True):
+def savefig(figname="temp.png", clear=True, dpi=200):
     """Saves figure in `graphpath` as specified in config.py."""
     plt.tight_layout()
-    plt.savefig(os.path.join(graphpath, figname), dpi=200)
+    plt.savefig(os.path.join(graphpath, figname), dpi=dpi)
     if clear: plt.clf()
 
