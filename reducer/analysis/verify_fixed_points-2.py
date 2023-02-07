@@ -45,7 +45,7 @@ for i in range(9): # only plot the first 9 trajectories
     for fp_pca in fp_pcas:
         color = "k" if stable else "r"
         ax.scatter([fp_pca[0]], [fp_pca[1]], [fp_pca[2]], color=color)
-vis.savefig(dpi=300)
+vis.savefig(figname="verify_fp_no_bias.png", dpi=300)
 
 # Plot gif for Fig 6
 ax6 = vis.plot_trajectory(y_pcas[6].T, projection="3d", save=False)

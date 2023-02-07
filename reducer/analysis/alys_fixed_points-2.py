@@ -1,5 +1,5 @@
 '''
-Plot fixed points in terms of the instantaneous inputs.
+Plot fixed points in terms of the instantaneous inputs, evolving in time.
 '''
 
 import os
@@ -12,12 +12,16 @@ import reducer.support.dynamics as dy
 import reducer.support.visualization as vis
 from sklearn.decomposition import PCA
 from reducer.support.basics import constant, single_sine
-from reducer.config import modelpath
+from reducer.config import modelpath, graphpath
 
 # parameters
+simulate_fp = False
+use_alltrajs = False
 use_simulation = True
+clip = False
 specify = 0
-episode = 5
+episode = 82
+foldername = f"fixed_point_t_episode={episode}"
 
 # Load model
 rnn, inn, br, bi = bcs.model_loader(specify=specify) 
@@ -40,22 +44,34 @@ else: # use real input and results
     sim_results = bcs.simulation_loader(specify, "constant", episode=episode)
     observations = sim_results["observations"]
     trajs = sim_results["activities_rnn"]
+if clip: observations = np.clip(observations, 0, 1) # odor concentration values clip 
 
-# eigenvalue spectrum
-quantities, colors = [], []
-color_green = sns.color_palette("light:b", 10) ## len(observations)
-for t in range(10): # only last 10 points
+if use_alltrajs: # plot all trajectories as reference
+    trajs = np.load(os.path.join(modelpath, "activities_rnn", f"alltrajs_agent={specify+1}.npy"))
+
+# Perform PCA on trajectories
+pca = PCA(n_components=3)
+y_pca = pca.fit_transform(trajs)
+
+# plot in time
+color = sns.color_palette("viridis", len(observations))
+angles = [round(i,0) for i in np.linspace(-180, 180, len(observations))]
+for t in range(len(observations)):
     # Obtain the fixed points
-    x_0 = observations[-t]
+    x_0 = observations[t]
     args = [x_0, rnn, inn, br, bi]
     fps = dy.get_fixed_points(*args)
     Js = [dy.jacobian(fp, args) for fp in fps]
 
-    # Analyze eigenvalue spectrum
-    for J in Js:
-        evs, ews = np.linalg.eig(J)
-        evs_sorted = sorted(abs(evs), reverse=True)
-        quantities.append(evs_sorted)
-        colors.append(color_green[t])
+    # plot fixed points and trajectory
+    ax = plt.figure().add_subplot(projection="3d")
+    fps_pca = pca.transform(fps)
+    ax.scatter(*fps_pca.T, color=color[t])
+    vis.plot_trajectory(y_pca.T[:,:t], save=False, ax=ax, projection="3d")
 
-vis.plot_quantities(quantities, figname=f"eigenvalues_episode={episode}.png", save=True, color=colors, xlabel="", ylabel="eigenvalues")
+    # save
+    ax.view_init(30, angles[t])
+    if not os.path.exists(os.path.join(graphpath, foldername)): os.mkdir(os.path.join(graphpath, foldername))
+    vis.savefig(figname=f"{foldername}/{round(angles[t],0)}.png", close=True)
+
+vis.gen_gif(False, foldername, None, stall=5, angles=angles)

@@ -179,7 +179,7 @@ def plot_obs_act_traj(actions, observations, figname="temp.png"):
 
     savefig(figname=figname)
 
-def gen_gif(gen_fig, foldername, ax, stall=5, angle1=30):
+def gen_gif(gen_fig, foldername, ax, stall=5, angle1=30, angles=None):
     if not os.path.exists(os.path.join(graphpath, foldername)): os.mkdir(os.path.join(graphpath, foldername))
     if gen_fig:
         for angle in tqdm.tqdm(np.linspace(-180, 180, 20)):
@@ -187,7 +187,8 @@ def gen_gif(gen_fig, foldername, ax, stall=5, angle1=30):
             savefig(figname=f"{foldername}/{round(angle,0)}.png", clear=False)
 
     images = []
-    for angle in tqdm.tqdm(np.linspace(-180, 180, 20)):
+    if angles == None: angles = np.linspace(-180, 180, 20)
+    for angle in tqdm.tqdm(angles):
         for _ in range(stall):
             images.append(imageio.imread(os.path.join(graphpath, foldername, f"{round(angle,0)}.png")))
     imageio.mimsave(os.path.join(graphpath, f"{foldername}.gif"), images)
@@ -234,9 +235,10 @@ def common_col_title(fig, titles, shape):
         ax.set_title(titles[n])
     return fig
 
-def savefig(figname="temp.png", clear=True, dpi=200):
+def savefig(figname="temp.png", clear=True, close=False, dpi=200):
     """Saves figure in `graphpath` as specified in config.py."""
     plt.tight_layout()
     plt.savefig(os.path.join(graphpath, figname), dpi=dpi)
     if clear: plt.clf()
+    if close: plt.close("all")
 

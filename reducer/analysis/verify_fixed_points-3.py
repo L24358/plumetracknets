@@ -46,4 +46,4 @@ for i in range(rp):
     for fp_pca in fp_pcas:
         color = "k" if stable else "r"
         ax.scatter([fp_pca[0]], [fp_pca[1]], [fp_pca[2]], color=color)
-vis.savefig(dpi=300)
+vis.savefig(figname="verify_fp_with_bias.png", dpi=300)

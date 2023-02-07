@@ -26,7 +26,7 @@ same_ic = True
 thre = 1e-07
 T = 1000
 noise_std = 0.0
-seed = 98358 # np.random.randint(0, high=99999) 
+seed = 7537 # np.random.randint(0, high=99999) 
 
 # set np seed
 np.random.seed(seed) # good values: 7537, 98358, 24298
@@ -39,7 +39,7 @@ fit_dic = bcs.fit_loader(specify, episode)
 def get_traj_obs(fit_dic):
     observations = bcs.FitGenerator(fit_dic).generate(np.arange(T))
     observations += np.random.normal(0, noise_std, size=observations.shape)
-    if clip: observations = np.clip(observations, 0, 1) # clip odor concentration values
+    if clip: observations = np.clip(observations, 0, 1) # odor concentration values clip 
 
     # get all trajectories and observations
     trajs, obs = [], []
