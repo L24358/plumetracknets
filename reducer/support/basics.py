@@ -148,7 +148,7 @@ class FitFuncs():
         }
 
         self.rdic = {} # reverse dict
-        for key, value in self.dic.items(): self.rdic[value] = dic
+        for key, value in self.dic.items(): self.rdic[value] = key
 
     def __call__(self, name, reverse=False):
         if not reverse: return self.dic[name]
@@ -162,7 +162,26 @@ def envelope_sine(t, A, f_slow, phi_slow, f_fast, phi_fast, b, s):
 
 def constant(t, b): return np.ones(len(t))*b
 
+class FitGenerator():
+    def __init__(self, dic):
+        self.dic = dic
+        self.translator = FitFuncs()
 
+    def eliminate_drift(self, funcname, params): # implemented for ssine only
+        if funcname == "ssine":
+            params[-1] = 0
+            return params
+        return params
+
+    def generate(self, t, eliminate_drift=False):
+        seqs = []
+        for key in ["C", "y", "x"]:
+            pms, funcname, _ = self.dic[key]
+            if eliminate_drift: pms = self.eliminate_drift(funcname, pms)
+            seq = self.translator(funcname)(t, *pms)
+            seqs.append(seq)
+        
+        return np.vstack(seqs).T
 
 
 

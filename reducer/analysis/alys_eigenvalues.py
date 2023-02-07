@@ -42,18 +42,19 @@ else: # use real input and results
 
 # eigenvalue spectrum
 quantities, colors = [], []
-color_green = sns.color_palette("light:b", len(observations))
-for t in range(len(observations)):
+color_green = sns.color_palette("light:b", 10) ## len(observations)
+for t in range(10): # only last 10 points
     # Obtain the fixed points
-    x_0 = observations[t]
+    x_0 = observations[-t]
     args = [x_0, rnn, inn, br, bi]
     fps = dy.get_fixed_points(*args)
     Js = [dy.jacobian(fp, args) for fp in fps]
 
     # Analyze eigenvalue spectrum
     for J in Js:
-        evs, ews = np.eig(J)
-        quantities.append(evs)
+        evs, ews = np.linalg.eig(J)
+        evs_sorted = sorted(abs(evs), reverse=True)
+        quantities.append(evs_sorted)
         colors.append(color_green[t])
 
 vis.plot_quantities(quantities, figname="temp.png", save=True, color=colors)

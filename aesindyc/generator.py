@@ -6,7 +6,7 @@ sys.path.append('../../src')
 from aesindy.sindy_utils import library_size
 
 
-def get_lorenz_data(n_ics, noise_strength=0, A=0.):
+def get_lorenz_data(n_ics, noise_strength=0, A=0., input_dim=128):
     """
     Generate a set of Lorenz training data for multiple random initial conditions.
 
@@ -20,7 +20,7 @@ def get_lorenz_data(n_ics, noise_strength=0, A=0.):
     """
     t = np.arange(0, 5, .02)
     n_steps = t.size
-    input_dim = 128
+    input_dim = input_dim
     
     ic_means = np.array([0,0,25])
     ic_widths = 2*np.array([36,48,41])

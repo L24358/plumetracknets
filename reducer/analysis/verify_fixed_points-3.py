@@ -1,5 +1,5 @@
 '''
-Verify numerically solved fixed points by simulation. (For no bias)
+Verify numerically solved fixed points by simulation. (With bias)
 '''
 
 import numpy as np
@@ -13,7 +13,7 @@ from sklearn.decomposition import PCA
 specify = 0
 rnn, inn, br, bi = bcs.model_loader(specify=specify)
 
-# Fixed points for no input, no bias
+# Fixed points for no input, with bias
 x_0 = [1., 1., 1.]
 args = [x_0, rnn, inn, br, bi]
 fps = dy.get_fixed_points(*args)

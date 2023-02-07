@@ -73,3 +73,38 @@ for key in keys:
 def dummy(func): return func(y)
 funcs = build_rhs_poly3_wsine(coefs, mask, total_dim)
 rhs = sum(list(map(dummy, funcs)))
+
+# from verify_pca-sindyc-2.py
+# analyze model
+def build_rhs_poly2_nsine(y, u, coefs, mask, total_dim):
+
+    y = np.append(y, u)
+
+    def constant(c): return c
+
+    rhs = []
+    # for constant
+    if mask[0]: rhs.append(constant(coefs[0])) 
+    
+    # for cross terms, 1
+    count = 1
+    for i in range(total_dim):
+        if mask[count]: rhs.append(coefs[count]*y[i])
+        count += 1
+
+    for i in range(total_dim):
+        for j in range(i, total_dim):
+            if mask[count]: rhs.append(coefs[count]*y[i]*y[j])
+            count += 1
+
+    # for i in range(total_dim):
+    #     for j in range(i, total_dim):
+    #         for k in range(j, total_dim):
+    #             if mask[count]: rhs.append(coefs[count]*y[i]*y[j]*y[k])
+    #             count += 1
+
+    return sum(rhs)
+
+def rhs(y, t, u, coefs, mask, total_dim): ## Dirty fix for int(t)
+    dydt = [build_rhs_poly2_nsine(y, u[int(t)], coefs[i], mask[i], total_dim) for i in range(len(coefs))]
+    return np.array(dydt)

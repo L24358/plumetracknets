@@ -13,11 +13,6 @@ from reducer.support.basics import single_sine, constant # TODO: fix this
 
 params = {}
 
-# generate training, validation, testing data
-noise_strength = 1e-6
-training_data = get_lorenz_data(1024, noise_strength=noise_strength)
-validation_data = get_lorenz_data(20, noise_strength=noise_strength)
-
 # NEW: ptn data
 specify, episode, T, rp = 0, 5, 128, 1000
 training_data = dy.generate_single_trial(specify, episode, T, rp)

@@ -16,8 +16,9 @@ params = {}
 
 # generate training, validation, testing data
 noise_strength = 1e-6
-training_data = get_lorenz_data(1024, noise_strength=noise_strength)
-validation_data = get_lorenz_data(20, noise_strength=noise_strength)
+training_data = get_lorenz_data(1024, noise_strength=noise_strength, A=1.)
+validation_data = get_lorenz_data(20, noise_strength=noise_strength, A=1.)
+
 
 # NEW: control dimensions
 params['ctrl_dim'] = 1

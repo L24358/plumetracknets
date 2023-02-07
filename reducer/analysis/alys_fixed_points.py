@@ -49,12 +49,9 @@ if use_alltrajs: # plot all trajectories as reference
 pca = PCA(n_components=3)
 y_pca = pca.fit_transform(trajs)
 ax = plt.figure().add_subplot(projection="3d")
-plot_trajectory(y_pca.T, save=False, ax=ax)
-# ax.plot(y_pca[:,0], y_pca[:,1], y_pca[:,2], "k", alpha=0.5)
+vis.plot_trajectory(y_pca.T, save=False, ax=ax, projection="3d")
 
-import pdb; pdb.set_trace() # TODO: use faded color
-color_red = sns.color_palette("dark:salmon_r", len(observations))
-color_green = sns.light_palette("seagreen", len(observations))
+color = sns.color_palette("viridis", len(observations))
 for t in range(len(observations)):
     # Obtain the fixed points
     x_0 = observations[t]
@@ -65,13 +62,13 @@ for t in range(len(observations)):
     # Check how accurate the fixed point solutions are, and stability
     fps_pca = pca.transform(fps)
     for i in range(len(fps)):
-        print(f"sum(rhs) for fp{i}: ", sum(dy.rhs(fps[i], args)))
-        evs = np.linalg.eigvals(Js[i])
-        stable = np.all(abs(evs) < 1)
-        print(f"Is the fixed point stable? ", stable)
+        ax.scatter(*fps_pca[i], color=color[t])
 
-        color = color_green[t] if stable else color_red[t]
-        ax.scatter(*fps_pca[i], color=color)
+        # get largest eigenvector
+        # evs, ews = dy.get_sorted_eig(fps[i], args)
+        # ew_max = ews[0]
+        # ew_pca = pca.transform(ew_max)
+        # ax.quiver(*fps_pca[i], *ew_pca, color[t])
 
     # Simulate and plot trial with fixed point as i.c.
     if simulate_fp:

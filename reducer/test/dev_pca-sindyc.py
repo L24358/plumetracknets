@@ -1,3 +1,7 @@
+'''
+Try PySINDYc on "real" data.
+'''
+
 import os
 import numpy as np
 import matplotlib.pyplot as plt
@@ -21,7 +25,7 @@ for i in range(240):
     h_0 = sim_results["activities_rnn"][0]
     t, y_rnn, actions_rnn = dy.sim_actor(rnn, inn, br, bi, dy.assigned_obs(observations), h_0, specify, T=len(observations))
 
-    trajs.append(y_rnn)
+    trajs.append(y_rnn[1:])
     obs.append(observations)
 trajs = np.vstack(trajs)
 obs = np.vstack(obs)
@@ -32,5 +36,7 @@ y_pca = pca.fit_transform(trajs)
 
 # define and fit model
 model = SINDy()
-model.fit(trajs, u=observations)
-eqs = model.equations()
+model.fit(y_pca, u=obs)
+model.print()
+
+import pdb; pdb.set_trace()

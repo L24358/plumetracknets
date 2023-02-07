@@ -55,7 +55,7 @@ trajs = [[[], [], []], [[], []]] # shape = (2, 3)
 fitfuncs = bcs.FitFuncs()
 for i in range(5):
     popt, func, err = eval_fit(targets[i])
-    popts[quantities[i]] = [popt, fitfuncs(funcs, reverse=True), err]
+    popts[quantities[i]] = [popt, fitfuncs(func, reverse=True), err]
     idx1, idx2 = np.unravel_index(i, (2, 3))
     trajs[idx1][idx2] = [targets[i], func(np.arange(len(targets[i])), *popt)]
 

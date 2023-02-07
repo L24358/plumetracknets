@@ -60,6 +60,14 @@ def get_stability(fp, args):
     stable = np.all(abs(evs) < 1)
     return stable
 
+def get_sorted_eig(fp, args):
+    J = jacobian(fp, args)
+    evs, ews = np.linalg.eig(J)
+    idx = np.flip(np.argsort(abs(evs)))
+    evs_sorted = evs[idx]
+    ews_sorted = ews.T[idx]
+    return evs_sorted, ews_sorted # rows = eigenvectors
+
 ########################################################
 #               Matrix Numerical Methods               #
 ########################################################
@@ -169,9 +177,10 @@ def generate_single_trial(specify, episode, T, rp):
     rnn, inn, br, bi = bcs.model_loader(specify=specify)
     with open(os.path.join(modelpath, "fit", f"agent={specify+1}_episode={episode}_manual.pkl"), "rb") as f: dic = pickle.load(f)
     t = np.arange(T+1)
-    C = dic["C"][1](t, *dic["C"][0])
-    y = dic["y"][1](t, *dic["y"][0])
-    x = dic["x"][1](t, *dic["x"][0])
+    fitfunc = bcs.FitFuncs()
+    C = fitfunc(dic["C"][1])(t, *dic["C"][0])
+    y = fitfunc(dic["y"][1])(t, *dic["y"][0])
+    x = fitfunc(dic["x"][1])(t, *dic["x"][0])
     observations = np.vstack((C, y, x)).T
 
     keys = ["C", "y", "x"]

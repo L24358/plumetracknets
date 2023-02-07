@@ -6,16 +6,29 @@
     - https://github.com/dynamicslab/pysindy
 '''
 
+import numpy as np
+from scipy.integrate import odeint
 from pysindy import SINDy # TODO: rebuild container
 from aesindyc.generator import get_lorenz_data # TODO: include in setup.py
 
-# generate data
+# parameters
 A = 0
-noise_strength = 1e-6
-training_data = get_lorenz_data(1024, noise_strength=noise_strength, A=A) # u.shape = (T, ctrl_dim)
-validation_data = get_lorenz_data(20, noise_strength=noise_strength, A=A)
+
+# generate data
+u = lambda t : np.sin(2 * t) ** 2
+lorenz_c = lambda z,t : [
+                10 * (z[1] - z[0]) + u(t),
+                z[0] * (28 - z[2]) - z[1],
+                z[0] * z[1] - 8 / 3 * z[2],
+        ]
+
+t = np.arange(0,2,0.002)
+x = odeint(lorenz_c, [-8,8,27], t)
+u_eval = u(t)
+training_data = {"x": x, "u": u_eval, "t": t[1]-t[0]}
 
 # define and fit model
 model = SINDy()
-model.fit(training_data["x"], u=training_data["u"])
-eqs = model.equations()
+model.fit(training_data["x"], u=training_data["u"], t=training_data["t"])
+model.print()
+import pdb; pdb.set_trace()

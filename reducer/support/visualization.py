@@ -12,7 +12,7 @@ from reducer.config import graphpath
 #                     Plot Singles                     #
 ########################################################
 
-def plot_PCA_3d(data, figname="temp.png", save=True, plot_time=True):
+def plot_PCA_3d(data, figname="temp.png", save=True, plot_time=True, ax=None, **kwargs):
     """
     Plot high-dimensional `data` in 3 dims using PCA.
     @ Args:
@@ -21,11 +21,16 @@ def plot_PCA_3d(data, figname="temp.png", save=True, plot_time=True):
         - save: bool, save figure, default=True
         - plot_time: bool, plot time in color, default=True
     """
-    ax = plt.figure().add_subplot(projection="3d")
+    kw = {"color": "k", "xlabel": "", "ylabel": "", "subtitle": ""}
+    kw.update(kwargs)
+
+    if ax == None: ax = plt.figure().add_subplot(projection="3d")
     pca = PCA(n_components=3)
     y_pca = pca.fit_transform(data)
     if plot_time: color_time_3d(ax, y_pca[:,0], y_pca[:,1], y_pca[:,2])
-    else: ax.plot(y_pca[:,0], y_pca[:,1], y_pca[:,2], alpha=0.5)
+    else: ax.plot(y_pca[:,0], y_pca[:,1], y_pca[:,2], alpha=0.5, color=kw["color"])
+    
+    ax.set_xlabel(kw["xlabel"]); ax.set_ylabel(kw["ylabel"]); ax.set_title(kw["subtitle"])
     if save: savefig(figname)
 
 def plot_trajectory(trajectory, figname="temp.png", save=True, plot_time=True, ax=None, **kwargs):
