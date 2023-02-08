@@ -1,4 +1,5 @@
 import os
+import copy
 import pickle
 import torch
 import numpy as np
@@ -83,7 +84,18 @@ def low_rank_approximation(rnn, r):
 #                  Simulation Related                  #
 ########################################################
 
-def polar_to_cartesian(actions, scale=np.pi):
+def transform_observations(observations):
+    x, y, C = observations.T
+    C = np.clip(C, 0., 1.)
+    return np.vstack([x, y, C]).T
+
+def transform_actions(actions):
+    r, theta = np.array(actions).T
+    r = np.clip(r, 0., 1.)*2*0.04
+    theta = (np.clip(theta, 0., 1.)-0.5)*6.25*np.pi*0.04
+    return np.vstack([r, theta]).T
+
+def polar_to_cartesian(actions, scale=1):
     r, theta = np.array(actions).T
     x = r*np.cos(theta*scale)
     y = r*np.sin(theta*scale)
@@ -95,10 +107,11 @@ def cartesian_to_polar(coors):
     theta = np.arctan2(y, x)
     return r, theta
 
-def get_rotation_matrix(coor): # clockwise?
+def get_rotation_matrix(coor): # clockwise with pi/2 - theta
     r, theta = cartesian_to_polar([coor])
     theta = theta.item()
-    R = np.array([[np.cos(theta), -np.sin(theta)], [np.sin(theta), np.cos(theta)]])
+    theta = np.pi/2 - theta
+    R = np.array([[np.cos(theta), np.sin(theta)], [-np.sin(theta), np.cos(theta)]])
     return R
 
 def get_trajectory(actions):
@@ -109,6 +122,7 @@ def get_trajectory(actions):
     @ Returns:
         - coor: np.ndarray, shape = (#T, 2)
     '''
+    actions = transform_actions(actions) # "lossy" transformations
     x, y = polar_to_cartesian(actions)
     coor = np.zeros((1,2))
     for t in range(len(x)):
@@ -116,7 +130,7 @@ def get_trajectory(actions):
         v = np.array([x[t], y[t]])
         new_coor = coor[-1] + R @ v
         coor = np.vstack((coor, new_coor))
-    return coor
+    return coor, actions
 
 def sim(Wh, Wc, br, bi, obs, h_0, **kwargs):
     '''
@@ -172,8 +186,61 @@ def single_sine_obs(params):
         return np.array([C, y, x])
     return inner
 
+########################################################
+#                Mass Loading Functions                #
+########################################################
+
+def obs_traj_loader(specify, episode, rp=1, T=1000, **kwargs):
+    kw = {"fit_dic": None, "noise_std": 0, "clip": False, "return_info": False, "seed": None}
+    kw.update(kwargs)
+    
+    # Load model, fit dic
+    rnn, inn, br, bi = bcs.model_loader(specify=specify)
+    fit_dic = bcs.fit_loader(specify, episode) if kw["fit_dic"] == None else kw["fit_dic"]
+
+    # seed
+    seed = np.random.randint(0, high=99999) if kw["seed"] == None else kw["seed"]
+    np.random.seed(seed)
+    print("seed: ", seed)
+
+    # Generate observation values
+    observations = bcs.FitGenerator(fit_dic).generate(np.arange(T+1))
+    observations += np.random.normal(0, kw["noise_std"], size=observations.shape) # add noise
+    if kw["clip"]: observations = np.clip(observations, 0, 1) # clip odor concentration values
+
+    # get all trajectories, observations, and other info
+    trajs, obs, h_0s = [], [], []
+    for i in range(1):
+        h_0 = np.random.uniform(low=-1, high=1, size=(64,))
+        t, y_rnn, actions_rnn = sim_actor(rnn, inn, br, bi, assigned_obs(observations), h_0, specify, T=len(observations))
+
+        trajs.append(y_rnn[1:])
+        obs.append(observations)
+        h_0s.append(h_0)
+    obs = np.vstack(obs)
+    trajs = np.vstack(trajs)
+    h_0s = np.vstack(h_0s)
+
+    info = copy.deepcopy(kw)
+    info.update({"h_0": h_0s, "seed": seed})
+
+    # return
+    if not kw["return_info"]: return obs, trajs
+    else: return obs, trajs, info
+
+def ptn_loader(specify, episode, rp, T):
+    obs, var, info = obs_traj_loader(specify, episode, rp=rp, T=T, return_info=True)
+
+    t = np.arange(T)
+    t_tiled = np.tile(t, rp).reshape(-1, 1)
+    u = np.tile(obs, (rp, 1))
+    dvar = var[1:] - var[:-1]
+    dic = {"t": t_tiled, "x": var[1:], 'dx': dvar, "u": u}
+    dic.update(info)
+    return dic
+
 def generate_single_trial(specify, episode, T, rp):
-    '''UNFINISHED.'''
+    '''To be deleted.'''
     rnn, inn, br, bi = bcs.model_loader(specify=specify)
     with open(os.path.join(modelpath, "fit", f"agent={specify+1}_episode={episode}_manual.pkl"), "rb") as f: dic = pickle.load(f)
     t = np.arange(T+1)

@@ -1,3 +1,12 @@
+@ Meeting on 20230207:
+    1. What is a satisfactory conclusion?
+        --> What the agent is doing, and how it is doing it (using dynamical systems language)
+    2. Is there memory? And if so, how is it represented?
+        --> "Markov" system, so "memory" must lie in the "location" in neural activity space
+        --> e.g. in center of plume (constant C, y) --> collapse to fixed point?
+        --> How can I increase speed for collapsing into fixed point? (Wc > Wr)
+    3. (For recovery) Is the agent performing an informed biased search based on memory?
+
 @ 20230201 AESINDY-c TTD:
     1. Make sure that AESINDY-c runs on A=0 sine wave input, and that the results are correct.
     2. See if AESINDY-c runs on A!=0 sine wave input, by slowly increasing/decreasing A.

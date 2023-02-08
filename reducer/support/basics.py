@@ -44,6 +44,12 @@ def train_val_split(datadic, p):
         valdic[key] = datadic[key][N_train:]
     return traindic, valdic
 
+def dump(dic, foldername, filename, motherpath=modelpath):
+    if not os.path.exists(os.path.join(motherpath, foldername)): os.mkdir(os.path.join(motherpath, foldername))
+    with open(os.path.join(motherpath, foldername, filename), "wb") as f: pickle.dump(dic, f)
+
+def to_string(l): return [str(i) for i in l]
+
 ########################################################
 #                   Loading Functions                  #
 ########################################################
