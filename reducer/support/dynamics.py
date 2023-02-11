@@ -132,6 +132,18 @@ def get_trajectory(actions):
         coor = np.vstack((coor, new_coor))
     return coor, actions
 
+def get_trajectory2(actions):
+    actions = transform_actions(actions) # "lossy" transformations
+    locs = [np.zeros((1,2))]
+    angles = [0] # might as well be 0
+    for t in range(len(actions)):
+        old_angle, old_loc = angles[-1], locs[-1]
+        new_angle = old_angle + actions[:,1][t]
+        new_loc = old_loc + actions[:,0][t] * np.array([np.cos(new_angle), np.sin(new_angle)])
+        angles.append(new_angle)
+        locs.append(new_loc)
+    return np.vstack(locs), np.array(angles), actions
+
 def sim(Wh, Wc, br, bi, obs, h_0, **kwargs):
     '''
     Simulates the RNN.

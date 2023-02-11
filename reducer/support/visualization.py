@@ -180,6 +180,21 @@ def plot_obs_act_traj(actions, observations, figname="temp.png"):
 
     savefig(figname=figname)
 
+def plot_obs_act_traj2(actions, observations, figname="temp.png"):
+    fig = plt.figure(figsize=(9,3))
+    ax1 = fig.add_subplot(131)
+    observations = dy.transform_observations(observations)
+    plot_quantities(observations.T, save=False, ax=ax1, ylabel="value", subtitle="Observations", color=["k", "r", "b"], label=["x", "y", "C"])
+
+    ax2 = fig.add_subplot(132)
+    traj, angles, actions = dy.get_trajectory2(actions)
+    plot_quantities(actions.T, save=False, ax=ax2, ylabel="value", subtitle="Actions", color=["g", "m"], label=["r", "\u03B8"])
+
+    ax3 = fig.add_subplot(133)
+    plot_trajectory(traj.T, save=False, ax=ax3)
+
+    savefig(figname=figname)
+
 def gen_gif(gen_fig, foldername, ax, stall=5, angle1=30, angles=None):
     if not os.path.exists(os.path.join(graphpath, foldername)): os.mkdir(os.path.join(graphpath, foldername))
     if gen_fig:
