@@ -59,7 +59,7 @@ for i in range(5):
     idx1, idx2 = np.unravel_index(i, (2, 3))
     trajs[idx1][idx2] = [targets[i], func(np.arange(len(targets[i])), *popt)]
 
-subtitle = ["C", "y", "x", "r", "\u03B8"]
+subtitle = ["x", "y", "C", "r", "\u03B8"]
 color = ["k", "r", "b", "g", "m"]
 title = "Fit Observations, Actions"
 vis.plot_multiple_quantities2(trajs, figname=f"fit_agent={specify+1}_episode={episode}.png", override_N=5, subtitle=subtitle, color=color, title=title)

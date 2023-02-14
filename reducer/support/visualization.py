@@ -183,7 +183,6 @@ def plot_obs_act_traj(actions, observations, figname="temp.png"):
 def plot_obs_act_traj2(actions, observations, figname="temp.png"):
     fig = plt.figure(figsize=(9,3))
     ax1 = fig.add_subplot(131)
-    observations = dy.transform_observations(observations)
     plot_quantities(observations.T, save=False, ax=ax1, ylabel="value", subtitle="Observations", color=["k", "r", "b"], label=["x", "y", "C"])
 
     ax2 = fig.add_subplot(132)
@@ -257,4 +256,5 @@ def savefig(figname="temp.png", clear=True, close=False, dpi=200):
     plt.savefig(os.path.join(graphpath, figname), dpi=dpi)
     if clear: plt.clf()
     if close: plt.close("all")
+
 

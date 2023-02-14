@@ -44,11 +44,8 @@ def train_val_split(datadic, p):
         valdic[key] = datadic[key][N_train:]
     return traindic, valdic
 
-def dump(dic, foldername, filename, motherpath=modelpath):
-    if not os.path.exists(os.path.join(motherpath, foldername)): os.mkdir(os.path.join(motherpath, foldername))
-    with open(os.path.join(motherpath, foldername, filename), "wb") as f: pickle.dump(dic, f)
-
-def to_string(l): return [str(i) for i in l]
+def reorder_dict(dic):
+    return {k: dic[k] for k in seed_order}
 
 ########################################################
 #                   Loading Functions                  #
@@ -78,6 +75,7 @@ def model_loader(specify="all"):
         if len(rnns[key]) != 4: raise AlgorithmError("Did not find complete set of weight/bias matrices!")
 
     # Return value depends on specify
+    rnns = reorder_dict(rnns)
     if specify == "all": return rnns
     elif specify == "random":
         idx = np.random.choice(len(rnns.keys()))
@@ -105,15 +103,18 @@ def actor_loader(specify="all"):
         if len(nns[key]) != 7: raise AlgorithmError("Did not find complete set of weight/bias matrices!")
 
     # Return value depends on specify
+    nns = reorder_dict(nns)
     if specify == "all": return nns
     elif specify == "random":
         idx = np.random.choice(len(nns.keys()))
-        print(f"Loading model {idx+1}.")
+        print(f"Loading model {idx}, i.e. seed={list(nns.keys())[idx]}")
         return list(nns.values())[idx]
-    elif type(specify) == int: return list(nns.values())[specify]
+    elif type(specify) == int:
+        print(f"Loading model {specify}, i.e. seed={list(nns.keys())[specify]}")
+        return list(nns.values())[specify]
     else: raise InputError(f"keyword `specify` does not support {specify}.")
 
-def fit_loader(specify, episode):
+def fit_loader(specify, episode): # TODO: need to rerun after reorder_dict implementation
     with open(os.path.join(modelpath, "fit", f"agent={specify+1}_episode={episode}_manual.pkl"), "rb") as f:
         data = pickle.load(f)
     return data
@@ -134,6 +135,38 @@ def simulation_loader(specify, tpe, episode="random"):
         dic[item] = np.load(filepath)
 
     return dic
+
+########################################################
+#                     Read / Write                     #
+########################################################
+
+def dump(dic, foldername, filename, motherpath=modelpath):
+    if not os.path.exists(os.path.join(motherpath, foldername)): os.mkdir(os.path.join(motherpath, foldername))
+    with open(os.path.join(motherpath, foldername, filename), "wb") as f: pickle.dump(dic, f)
+
+def to_string(l): return [str(i) for i in l]
+
+def to_(l, types): return [types[i](l[i]) for i in range(len(l))]
+
+def split_sort(row, sep=" ", sep2="="):
+    l = row.strip().split(sep)
+    if sep2 != None: return [item.split(sep2)[-1] for item in l]
+    return l
+
+def write_row(filename, foldername, row):
+    os.makedirs(os.path.join(modelpath, foldername), exist_ok=True)
+    f = open(os.path.join(modelpath, foldername, filename), "a")
+    f.write(row + "\n")
+    f.close()
+
+def read_row(filename, foldername, action):
+    f = open(os.path.join(modelpath, foldername, filename), "r")
+    data = f.readlines()
+    f.close()
+
+    res = []
+    for row in data: res.append(action(row))
+    return res
 
 ########################################################
 #                      Parameters                      #

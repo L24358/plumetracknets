@@ -90,9 +90,16 @@ def transform_observations(observations):
     return np.vstack([x, y, C]).T
 
 def transform_actions(actions):
+    actions = (np.tanh(actions) + 1)/2
+    actions = np.clip(actions, 0., 1.)
+
+    move_capacity = 2
+    turn_capacity = 6.25*np.pi
+    env_dt = 0.04
+
     r, theta = np.array(actions).T
-    r = np.clip(r, 0., 1.)*2*0.04
-    theta = (np.clip(theta, 0., 1.)-0.5)*6.25*np.pi*0.04
+    r = r*move_capacity*env_dt
+    theta = (theta-0.5)*turn_capacity*env_dt
     return np.vstack([r, theta]).T
 
 def polar_to_cartesian(actions, scale=1):
@@ -144,6 +151,21 @@ def get_trajectory2(actions):
         locs.append(new_loc)
     return np.vstack(locs), np.array(angles), actions
 
+def get_action_from_h(specify, hs, return_info=False):
+    dic = bcs.actor_loader(specify=specify)
+    actor = Actor()
+    actor.init_params(dic)
+
+    if not return_info:
+        actions = actor(hs).squeeze().detach().numpy()
+        return actions
+    else:
+        ah1, ah2, actions = actor(hs, return_info=True)
+        ah1 = ah1.squeeze().detach().numpy()
+        ah2 = ah2.squeeze().detach().numpy()
+        actions = actions.squeeze().detach().numpy()
+        return ah1, ah2, actions
+
 def sim(Wh, Wc, br, bi, obs, h_0, **kwargs):
     '''
     Simulates the RNN.
@@ -172,11 +194,7 @@ def sim_actor(Wh, Wc, br, bi, obs, h_0, specify, **kwargs):
     kw = {"T": 100}
     kw.update(kwargs)
     rest, resy = sim(Wh, Wc, br, bi, obs, h_0, **kw)
-
-    dic = bcs.actor_loader(specify=specify)
-    actor = Actor()
-    actor.init_params(dic)
-    actions = actor(resy).squeeze().detach().numpy()
+    actions = get_action_from_h(specify, resy)
     return rest, resy, actions
 
 def constant_obs(x_0):
@@ -344,14 +362,16 @@ class Actor(nn.Module):
         self.actor[0].bias = nn.Parameter(torch.from_numpy(dic["base.actor.0.bias"]))
         self.dist.fc_mean.weight = nn.Parameter(torch.from_numpy(dic["dist.fc_mean.weight"]))
         self.dist.fc_mean.bias = nn.Parameter(torch.from_numpy(dic["dist.fc_mean.bias"]))
-        self.dist.logstd._weight = nn.Parameter(torch.from_numpy(dic["dist.logstd._bias"]))
+        self.dist.logstd._bias = nn.Parameter(torch.from_numpy(dic["dist.logstd._bias"]))
 
-    def forward(self, x):
+    def forward(self, x, return_info=False):
         if type(x) == np.ndarray: x = torch.from_numpy(x.astype(np.float32))
         h = self.actor1(x)
         y = self.actor(h)
         dist = self.dist(y)
-        return dist.mode()
+
+        if not return_info: return dist.mode()
+        else: return h, y, dist.mode()
 
 def init(module, weight_init, bias_init, gain=1):
     weight_init(module.weight.data, gain=gain)
