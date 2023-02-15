@@ -152,6 +152,10 @@ def get_trajectory2(actions):
     return np.vstack(locs), np.array(angles), actions
 
 def get_action_from_h(specify, hs, return_info=False):
+    # cast to type Tensor
+    if type(hs) == torch.Tensor: pass
+    else: hs = torch.from_numpy(np.array(hs).astype(np.float32))
+
     dic = bcs.actor_loader(specify=specify)
     actor = Actor()
     actor.init_params(dic)

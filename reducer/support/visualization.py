@@ -69,6 +69,18 @@ def plot_quantities(quantities, figname="temp.png", save=True, ax=None, **kwargs
         if not (kw["label"] == [""]*Q): ax.legend()
     if save: savefig(figname)
 
+def plot_scatter(x, y, figname="temp.png", save=True, ax=None, **kwargs):
+    """
+    Plot `quantities` in `ax`.
+    """
+    kw = {"color": "k", "xlabel":"", "ylabel":"", "subtitle":"", "s":20}
+    kw.update(kwargs)
+
+    if ax == None: ax = plt.figure().add_subplot(111)
+    ax.scatter(x, y, color=kw["color"], s=kw["s"])
+    ax.set_xlabel(kw["xlabel"]); ax.set_ylabel(kw["ylabel"]); ax.set_title(kw["subtitle"])
+    if save: savefig(figname)
+
 ########################################################
 #                    Plot Multiples                    #
 ########################################################

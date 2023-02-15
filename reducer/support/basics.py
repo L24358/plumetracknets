@@ -2,6 +2,8 @@ import os
 import pickle
 import numpy as np
 import reducer.support.navigator as nav
+from sklearn.metrics.cluster import mutual_info_score as MIscore
+from sklearn.metrics.cluster import normalized_mutual_info_score as aMIscore
 from reducer.config import modelpath
 from reducer.support.exceptions import TargetNotFoundError, AlgorithmError, InputError
 
@@ -223,8 +225,85 @@ class FitGenerator():
         return np.vstack(seqs).T
 
 
+########################################################
+#                 Mutual Information                   #
+########################################################
 
+def time_shift_MI_wrap(stimulus, response, shift, ds, numstate, normalization=False):
+    stimulus = easy_resample(stimulus, numstate)
+    response = easy_resample(response, numstate)
+    fMI, aMI = time_shift_MI(stimulus, response, shift, ds)
+    if not normalization: return fMI
+    else: return aMI
 
+def time_shift_MI(stimulus, response, shift, ds):
+    assert len(stimulus) == len(response)
+    past_MI, future_MI, past_aMI, future_aMI = [], [], [], []
+    for sh in range(ds, shift, ds): 
+        past_MI.append(MIscore(stimulus[:-sh], response[sh:])) #negative shift
+        past_aMI.append(aMIscore(stimulus[:-sh], response[sh:]))
+        future_MI.append(MIscore(stimulus[sh:], response[:-sh])) #positive shift
+        future_aMI.append(aMIscore(stimulus[sh:], response[:-sh]))
+    now_MI, now_aMI = MIscore(stimulus, response), aMIscore(stimulus, response)
+    all_MI = list(reversed(past_MI))+[now_MI]+future_MI
+    all_aMI = list(reversed(past_aMI))+[now_aMI]+future_aMI
+    return all_MI, all_aMI
+
+def easy_resample(stimulus, numstate):
+	sort_sti = list(sorted(stimulus))
+	chunk = int(len(stimulus)/numstate)
+	mmdic = {}
+	for n in range(numstate-1):
+		mmdic[(sort_sti[chunk*n], sort_sti[chunk*(n+1)])] = n
+	new_sti = []
+	for s in stimulus:
+		flag = True
+		for key in mmdic.keys():
+			if s >= key[0] and s < key[1]:
+				new_sti.append(mmdic[key])
+				flag = False
+		if flag: new_sti.append(numstate-1)
+	return new_sti
+
+########################################################
+#                 Coordinate Transforms                #
+########################################################
+
+class Agent():
+    def __init__(self):
+        self.loc = np.zeros(2) # origin
+        self.angle = np.pi # absolute angle; facing towards -y
+        self.history = np.array([[*self.loc, self.angle]])
+
+    def update(self, r, theta):
+        self.loc += r*np.array([np.cos(theta), np.sin(theta)])
+        self.angle += theta
+        self.angle = self.angle % np.pi
+        return self.loc, self.angle
+
+    def log(self, overwrite=[]):
+        if overwrite == []: overwrite = [*self.loc, self.angle]
+        self.history = np.append(self.history, np.array([overwrite]), axis=0)
+
+    def set_angle(self, theta): self.angle = theta
+
+def get_wind(observations, actions):
+    agent = Agent()
+    ego_wind_angles = []
+    abs_wind_angles = []
+    for t in range(len(observations)):
+        x, y, C = observations[t]
+        r, theta = actions[t]
+
+        ego_wind_angle = np.arctan2(y, x)
+        abs_wind_angle = agent.angle + ego_wind_angle
+        ego_wind_angles.append(ego_wind_angle % np.pi)
+        abs_wind_angles.append(abs_wind_angle % np.pi)
+
+        agent.update(r, theta)
+        agent.log()
+
+    return ego_wind_angles, abs_wind_angles, agent.history
 
 
 # Development purposes
