@@ -5,7 +5,6 @@ import matplotlib.pyplot as plt
 import reducer.support.basics as bcs
 import reducer.support.dynamics as dy
 import reducer.support.visualization as vis
-from alys_ahstar import get_fixed_point_action
 
 # define class, functions for convenience
 def get_closest_stable_fp(fps, h, args):
@@ -23,9 +22,9 @@ def get_closest_stable_fp(fps, h, args):
         print("Warning: No fixed point is found!")
         return None, True    
 
-def get_fixed_point_wrap(t, count=0, rp=100):
+def get_fixed_point_wrap(observations, t, args, hs, count=0, rp=100):
     x = observations[t]
-    args = [x, rnn, inn, br, bi]
+    args = [x] + args
     fps = dy.get_fixed_points(*args, rp=rp)
     fp, flag = get_closest_stable_fp(fps, hs[t], args)
 
@@ -35,7 +34,33 @@ def get_fixed_point_wrap(t, count=0, rp=100):
         if count > 3:
             print("Max iter reached!")
             return fp # if iter > max_iter, return no matter what
-        else: return get_fixed_point_wrap(t, count=count+1, rp=500) # try again
+        else: return get_fixed_point_wrap(observations, t, args, hs, count=count+1, rp=500) # try again
+
+def get_fixed_point_action(observations, actions, hs, args): # get fixed point actions, a(h_t^*)
+    h_sequence = []
+    fp_sequence = []
+    ego_wind_angles = []
+    abs_wind_angles = []
+    for t in range(len(actions)):
+        # get h_t^* and a(h_t^*)
+        flag = False
+        fp = get_fixed_point_wrap(observations, t, args, hs)
+        if type(fp) == np.ndarray: fp_sequence.append(fp)
+        else:
+            flag = True
+            print("Fixed point is unstable, or no fixed point is found after several attempts.")
+        
+        # get hs
+        if not flag: h_sequence.append(hs[t])
+
+        # get egocentric wind
+        if not flag:
+            x, y, C = observations[t]
+            ego_wind_angle = np.arctan2(y, x)
+            ego_wind_angles.append(ego_wind_angle)
+
+    assert len(h_sequence) == len(fp_sequence) == len(ego_wind_angles)
+    return h_sequence, fp_sequence, ego_wind_angles
 
 # plot absolute agent angle (both real and instantaneous) against plume 
 def get_agent_history_for_fp(actions_real, actions_star):
@@ -65,7 +90,7 @@ if __name__ == "__main__":
     # hyperparameters
     specify = 0
     tpe = "constant"
-    episode = "random"
+    episode = "random" # 128
 
     # load data
     rnn, inn, br, bi = bcs.model_loader(specify=specify) 
