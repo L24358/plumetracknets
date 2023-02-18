@@ -86,11 +86,15 @@ def get_abs_wind_angle(agent, ego_wind_angles):
         abs_wind_angles.append(abs_wind_angle)
     return abs_wind_angles
 
+def mask_by_odor(mask, *seqs):
+    eliminate = lambda m, s: [s[t] for t in range(len(m)) if m[t] > 0]
+    return [eliminate(mask, seq) for seq in seqs]
+
 if __name__ == "__main__":
     # hyperparameters
     specify = 0
     tpe = "constant"
-    episode = "random" # 128
+    episode = "random" #128, 153
 
     # load data
     rnn, inn, br, bi = bcs.model_loader(specify=specify) 
@@ -98,6 +102,7 @@ if __name__ == "__main__":
     observations = dic["observations"]
     actions = dic["actions"]
     hs = dic["activities_rnn"]
+    mask = observations[:,-1] > 0
 
     args = [rnn, inn, br, bi]
     h_sequence, fp_sequence, ego_wind_angles = get_fixed_point_action(observations, actions, hs, args)
@@ -106,11 +111,12 @@ if __name__ == "__main__":
     agent_real, agent_star = get_agent_history_for_fp(actions_real, actions_star)
     abs_wind_angles = get_abs_wind_angle(agent_real, ego_wind_angles)
 
-    counts1, _, _ = plt.hist(agent_real.history[:,-1], color="b", alpha=0.5)
-    counts2, _, _ = plt.hist(agent_star.history[:,-1], color="r", alpha=0.5)
+    agent_real_history, agent_star_history = mask_by_odor(mask, agent_real.history[:-1,-1], agent_star.history[:-1,-1])
+
+    counts1, _, _ = plt.hist(agent_real_history, color="b", alpha=0.5)
+    counts2, _, _ = plt.hist(agent_star_history, color="r", alpha=0.5)
     maxx = max(list(counts1) + list(counts2))
     centerline = np.mean(abs_wind_angles)
     plt.plot([centerline, centerline], [0, maxx], 'k--')
     vis.savefig()
-
-    
+    print(f"centerline: {centerline}, real: {np.mean(agent_real_history)}, star: {np.mean(agent_star_history)}")

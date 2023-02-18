@@ -21,17 +21,21 @@ def plot_PCA_3d(data, figname="temp.png", save=True, plot_time=True, ax=None, **
         - save: bool, save figure, default=True
         - plot_time: bool, plot time in color, default=True
     """
-    kw = {"color": "k", "xlabel": "", "ylabel": "", "subtitle": ""}
+    kw = {"color": "k", "xlabel": "", "ylabel": "", "subtitle": "", "y_pca": []}
     kw.update(kwargs)
 
     if ax == None: ax = plt.figure().add_subplot(projection="3d")
-    pca = PCA(n_components=3)
-    y_pca = pca.fit_transform(data)
+    if kw["y_pca"] == []:
+        pca = PCA(n_components=3)
+        y_pca = pca.fit_transform(data)
+    else:
+        y_pca = kw["y_pca"]
     if plot_time: color_time_3d(ax, y_pca[:,0], y_pca[:,1], y_pca[:,2])
     else: ax.plot(y_pca[:,0], y_pca[:,1], y_pca[:,2], alpha=0.5, color=kw["color"])
     
     ax.set_xlabel(kw["xlabel"]); ax.set_ylabel(kw["ylabel"]); ax.set_title(kw["subtitle"])
     if save: savefig(figname)
+    return ax
 
 def plot_trajectory(trajectory, figname="temp.png", save=True, plot_time=True, ax=None, **kwargs):
     """
@@ -42,13 +46,30 @@ def plot_trajectory(trajectory, figname="temp.png", save=True, plot_time=True, a
     @ Kwargs:
         - color: str, default="k"
     """
-    kw = {"color": "k", "xlabel": "x", "ylabel": "y", "subtitle": "", "projection": "2d"}
+    kw = {"color": "k", "xlabel": "x", "ylabel": "y", "subtitle": ""}
     kw.update(kwargs)
-    projection = kw["projection"]
 
-    if ax == None: ax = plt.figure().add_subplot(111, projection=projection)
-    if plot_time and projection == "2d": color_time_2d(ax, *trajectory)
-    elif plot_time and projection == "3d": color_time_3d(ax, *trajectory)
+    if ax == None: ax = plt.figure().add_subplot(111, projection="3d")
+    if plot_time: color_time_3d(ax, *trajectory)
+    else: ax.plot(*trajectory, alpha=0.5, color=kw["color"])
+    ax.set_xlabel(kw["xlabel"]); ax.set_ylabel(kw["ylabel"]); ax.set_title(kw["subtitle"])
+    if save: savefig(figname)
+    return ax
+
+def plot_trajectory_2d(trajectory, figname="temp.png", save=True, plot_time=True, ax=None, **kwargs):
+    """
+    Plot `trajectory` in `ax`.
+    @ Args:
+        - trajectory: array-like, shape=(2, N), N=#data
+        - ax: axis to plot in, default=None
+    @ Kwargs:
+        - color: str, default="k"
+    """
+    kw = {"color": "k", "xlabel": "x", "ylabel": "y", "subtitle": ""}
+    kw.update(kwargs)
+
+    if ax == None: ax = plt.figure().add_subplot(111)
+    if plot_time: color_time_2d(ax, *trajectory)
     else: ax.plot(*trajectory, alpha=0.5, color=kw["color"])
     ax.set_xlabel(kw["xlabel"]); ax.set_ylabel(kw["ylabel"]); ax.set_title(kw["subtitle"])
     if save: savefig(figname)
@@ -103,7 +124,7 @@ def plot_multiple_trajectory(trajectories, figname="temp.png", save=True, plot_t
     
     for c in range(s):
         ax = fig.add_subplot(1, s, c+1)
-        plot_trajectory(trajectories[c], save=False, plot_time=plot_time, ax=ax, **kw)
+        plot_trajectory_2d(trajectories[c], save=False, plot_time=plot_time, ax=ax, **kw)
         ax.set_xlabel(kw["xlabel"][c]); ax.set_ylabel(kw["ylabel"][c]); ax.set_title(kw["subtitle"][c])
     plt.suptitle(kw["suptitle"])
 
@@ -121,7 +142,7 @@ def plot_multiple_trajectory2(trajectories, figname="temp.png", save=True, plot_
     for c in range(N1*N2):
         i, j = np.unravel_index(c, (N1, N2))
         ax = fig.add_subplot(N1, N2, c+1)
-        plot_trajectory(trajectories[i][j], save=False, plot_time=plot_time, ax=ax)
+        plot_trajectory_2d(trajectories[i][j], save=False, plot_time=plot_time, ax=ax)
 
     if save: savefig(figname, clear=False)
     return plt.gcf()
@@ -188,7 +209,7 @@ def plot_obs_act_traj(actions, observations, figname="temp.png"):
     plot_quantities(actions.T, save=False, ax=ax2, ylabel="value", subtitle="Actions", color=["g", "m"], label=["r", "\u03B8"])
 
     ax3 = fig.add_subplot(133)
-    plot_trajectory(traj.T, save=False, ax=ax3)
+    plot_trajectory_2d(traj.T, save=False, ax=ax3)
 
     savefig(figname=figname)
 
@@ -202,7 +223,7 @@ def plot_obs_act_traj2(actions, observations, figname="temp.png"):
     plot_quantities(actions.T, save=False, ax=ax2, ylabel="value", subtitle="Actions", color=["g", "m"], label=["r", "\u03B8"])
 
     ax3 = fig.add_subplot(133)
-    plot_trajectory(traj.T, save=False, ax=ax3)
+    plot_trajectory_2d(traj.T, save=False, ax=ax3)
 
     savefig(figname=figname)
 

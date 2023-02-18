@@ -10,10 +10,13 @@ import reducer.support.visualization as vis
 def get_closest_stable_fp(fps, h, args):
     if len(fps) > 1: # if there are multiple fps to choose from, return closest fp and flag=False
         stable = [dy.get_stability(fp, args) for fp in fps]
-        fps = [fps[i] for i in range(len(fps)) if stable[i]]
-        diffs = [np.linalg.norm(fp - h) for fp in fps]
-        idx = diffs.index(min(diffs))
-        return fps[idx], False
+        if np.any(stable):
+            fps = [fps[i] for i in range(len(fps)) if stable[i]]
+            diffs = [np.linalg.norm(fp - h) for fp in fps]
+            idx = diffs.index(min(diffs))
+            return fps[idx], False
+        else:
+            return None, True # if none of the fixed points are stable
     elif len(fps) == 1: # if there is only one, return only fp and flag=is_stable
         stable = dy.get_stability(fps[0], args)
         if not stable: print("Warning: only single unstable fixed point exists!")
@@ -46,6 +49,7 @@ def get_fixed_point_action(observations, actions, hs, args): # get fixed point a
     fp_sequence = []
     ego_wind_angles = []
     abs_wind_angles = []
+    ts_exclude = list(range(len(actions)))
     for t in range(len(actions)):
         # get h_t^* and a(h_t^*)
         flag = False
@@ -64,8 +68,11 @@ def get_fixed_point_action(observations, actions, hs, args): # get fixed point a
             ego_wind_angle = np.arctan2(y, x)
             ego_wind_angles.append(ego_wind_angle)
 
+        # remove from tlist
+        if not flag: ts_exclude.remove(t)
+
     assert len(h_sequence) == len(fp_sequence) == len(ego_wind_angles)
-    return h_sequence, fp_sequence, ego_wind_angles
+    return h_sequence, fp_sequence, ego_wind_angles, ts_exclude
 
 if __name__ == "__main__":
 
@@ -83,7 +90,7 @@ if __name__ == "__main__":
 
     # get egocentric and absolute wind direction
     args = [rnn, inn, br, bi]
-    h_sequence, fp_sequence, ego_wind_angles = get_fixed_point_action(observations, actions, hs, args)
+    h_sequence, fp_sequence, ego_wind_angles, _ = get_fixed_point_action(observations, actions, hs, args)
 
     # compare
     actions_star = dy.get_action_from_h(specify, fp_sequence, return_info=False)

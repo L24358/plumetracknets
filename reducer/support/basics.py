@@ -4,7 +4,7 @@ import numpy as np
 import reducer.support.navigator as nav
 from sklearn.metrics.cluster import mutual_info_score as MIscore
 from sklearn.metrics.cluster import normalized_mutual_info_score as aMIscore
-from reducer.config import modelpath
+from reducer.config import modelpath, graphpath
 from reducer.support.exceptions import TargetNotFoundError, AlgorithmError, InputError
 
 ########################################################
@@ -48,6 +48,27 @@ def train_val_split(datadic, p):
 
 def reorder_dict(dic):
     return {k: dic[k] for k in seed_order}
+
+def fjoin(*args, tpe=1):
+    motherpath = modelpath if tpe==1 else graphpath
+    folders = args[:-1]
+    os.makedirs(os.path.join(motherpath, *folders), exist_ok=True)
+    return os.path.join(motherpath, *args)
+
+def npsave(item, *args): np.save(os.path.join(modelpath, *args), item)
+
+def npload(*args): return np.load(os.path.join(modelpath, *args))
+
+def pklsave(item, *args):
+    f = open(os.path.join(modelpath, *args), "wb")
+    pickle.dump(item, f)
+    f.close()
+
+def pklload(*args):
+    f = open(os.path.join(modelpath, *args), "rb")
+    data = pickle.load(f)
+    f.close()
+    return data
 
 ########################################################
 #                   Loading Functions                  #
@@ -121,12 +142,12 @@ def fit_loader(specify, episode): # TODO: need to rerun after reorder_dict imple
         data = pickle.load(f)
     return data
 
-def simulation_loader(specify, tpe, episode="random"):
+def simulation_loader(specify, tpe, episode="random", verbose=True):
     seed = seed_order[specify]
-    print(f"Loading model {specify}, i.e. seed={seed}")
+    if verbose: print(f"Loading model {specify}, i.e. seed={seed}")
     if episode == "random": episode = str(np.random.choice(240))
     else: episode = str(episode)
-    print(f"Using episode {episode}")
+    if verbose: print(f"Using episode {episode}")
     files = nav.file_finder(target=[seed, tpe, episode], extension=".npy", parent_name=os.path.join(modelpath, "observations"))
     tpe_full = param_finder(files[0], "tpe")
     fname = f"seed={seed}_tpe={tpe_full}_episode={episode}.npy"
@@ -304,6 +325,31 @@ def get_wind(observations, actions):
         agent.log()
 
     return ego_wind_angles, abs_wind_angles, agent.history
+
+class PCASVD():
+    def __init__(self, r):
+        self.r = r
+        self.U = np.load(os.path.join(modelpath, "pca_frame", "U.npy"))
+        self.V = np.load(os.path.join(modelpath, "pca_frame", "V.npy"))
+        self.S, self.singular_values_ = load_S()
+        self.col_mean = np.load(os.path.join(modelpath, "pca_frame", "col_mean.npy"))
+        self.components_ = self.V.T # the rows are the components, as per sklearn convention
+
+    def transform(self, X): # It is transformed into the mean-subtracted coordinates
+        X -= self.col_mean
+        return X[:, :self.r] @ self.V[:self.r, :self.r]
+
+    def get_base_traj(self, r=None):
+        if r == None: r = self.r
+        # return (self.U @ self.S @ self.V.T)[:, :r]
+        return self.U[:, :r] @ self.S[:r, :r] @ self.V.T[:r, :r]
+
+def load_S():
+    s = np.load(os.path.join(modelpath, "pca_frame", "s.npy"))
+    S = np.zeros((30184, 64))
+    np.fill_diagonal(S, s)
+    return S, s
+
 
 
 # Development purposes
