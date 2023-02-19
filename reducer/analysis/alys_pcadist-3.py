@@ -35,7 +35,9 @@ for episode in range(240):
 
 pos_Cfp = []
 neg_Cfp = []
-for episode in [38, 16, 21, 91]:
+pos_vfp = []
+neg_vfp = []
+for episode in [38, 16, 21, 91]: # choose 4 trials
     dic = bcs.simulation_loader(specify, tpe, episode=episode)
     observations = dic["observations"]
     vx, vy, C = observations.T
@@ -51,13 +53,25 @@ for episode in [38, 16, 21, 91]:
         else:
             neg_Cfp += list(fps_pca)
 
+        angle = np.arctan2(vy[t], vx[t])
+        if angle > 0:
+            pos_vfp += list(fps_pca)
+
+        else:
+            neg_vfp += list(fps_pca)
+
+
 pos_theta = np.array(pos_theta).T
 neg_theta = np.array(neg_theta).T
 pos_Cfp = np.array(pos_Cfp).T
 neg_Cfp = np.array(neg_Cfp).T
+pos_vfp = np.array(pos_vfp).T
+neg_vfp = np.array(neg_vfp).T
 ax = plt.figure().add_subplot(projection="3d")
 ax.scatter(*pos_theta, color="g", s=1)
 ax.scatter(*neg_theta, color="r", s=1)
-ax.scatter(*pos_Cfp, color="b", s=3)
-ax.scatter(*neg_Cfp, color="k", s=3)
-vis.gen_gif(True, "pca_dist", ax, stall=5, angle1=30, angles=None)
+# ax.scatter(*pos_Cfp, color="b", s=3)
+# ax.scatter(*neg_Cfp, color="k", s=3)
+ax.scatter(*pos_vfp, color="c", s=3)
+ax.scatter(*neg_vfp, color="m", s=3)
+vis.gen_gif(True, "pcadist_all", ax, stall=5, angle1=30, angles=None)

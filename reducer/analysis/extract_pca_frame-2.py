@@ -10,7 +10,7 @@ from sklearn.decomposition import PCA
 # hyperparameters
 specify = 0
 tpe = "constant"
-n = 2
+n = 64
 
 # append trajectories
 X = []
