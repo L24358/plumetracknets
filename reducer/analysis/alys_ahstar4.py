@@ -50,8 +50,8 @@ for episode in episodes:
     abs_wind_angles = bcs.npload("ahstar", f"abswindangle_agent={specify+1}_episode={episode}.npy")
     centerline = np.mean(bcs.npload("ahstar", f"abswindangle_agent={specify+1}_episode={episode}.npy"))
     
-    instants += list(instant)
-    noninstants += list(noninstant)
+    instants += list(instant[int(len(instant)//1.5):]) # only take second half bevause it's more likely tracking
+    noninstants += list(noninstant[int(len(noninstant)//1.5):])
     history_real.append(agent_real_history)
     history_star.append(agent_star_history)
     centerlines.append(centerline)
@@ -64,7 +64,7 @@ maxx = max(list(instant) + list(noninstant))
 ax = plt.figure().add_subplot(111)
 ax.plot([0, maxx], [0, maxx], "k--")
 sns.kdeplot(x=instants, y=noninstants, cmap="Reds", shade=True, bw_adjust=.5, cbar=True, cbar_kws={'label': 'probability density'})
-ax.set_xlabel("$a(h_t^*)$"); ax.set_ylabel("$a(h_t)$")
+ax.set_xlabel("$a(h_t^*) - $\u03C6"); ax.set_ylabel("$a(h_t) - $\u03C6")
 vis.savefig(figname=f"ahstar1_agent={specify+1}_all.png")
 
 # plot alys-2

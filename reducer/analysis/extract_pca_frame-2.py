@@ -18,10 +18,11 @@ for episode in range(240):
     dic = bcs.simulation_loader(specify, tpe, episode=episode)
     hrnn = dic["activities_rnn"]
     X.append(hrnn)
-X = np.vstack(X)
+X2 = np.vstack(X)
 
 # pca from sklearn
 pca = PCA(n_components=n)
-all_traj = pca.fit_transform(X)
-dic = {"pca": pca, "all_traj": all_traj}
+all_traj = pca.fit_transform(X2)
+all_traj_sep = [pca.transform(X[i]) for i in range(240)]
+dic = {"pca": pca, "all_traj": all_traj, "all_traj_sep": all_traj_sep}
 bcs.pklsave(dic, "pca_frame", f"pcaskl_agent={specify+1}_n={n}.pkl")

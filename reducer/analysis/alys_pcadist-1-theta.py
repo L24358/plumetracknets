@@ -11,7 +11,9 @@ from sklearn.decomposition import PCA
 
 specify = 0
 tpe = "constant"
-pca_dic = bcs.pklload("pca_frame", f"pcaskl_agent={specify+1}_n=3.pkl")
+save = "all"
+n = 3 if save == "pca" else 64
+pca_dic = bcs.pklload("pca_frame", f"pcaskl_agent={specify+1}_n={n}.pkl")
 pca = pca_dic["pca"]
 all_traj = pca_dic["all_traj"]
 
@@ -44,16 +46,17 @@ for episode in range(240):
                 neg_thetas.append(abs(theta))
         i += 1
 
-assert i == len(all_traj)
-pos = np.array(pos).T
-neg = np.array(neg).T
-ax = plt.figure().add_subplot(projection="3d")
-ax.scatter(*pos, c=pos_thetas, cmap="Reds", s=1)
-ax.scatter(*neg, c=neg_thetas, cmap="Greens", s=1)
-vis.gen_gif(True, "pcadist_theta", ax, stall=5, angle1=30, angles=None)
+if save == "pca":
+    assert i == len(all_traj)
+    pos = np.array(pos).T
+    neg = np.array(neg).T
+    ax = plt.figure().add_subplot(projection="3d")
+    ax.scatter(*pos, c=pos_thetas, cmap="Reds", s=1)
+    ax.scatter(*neg, c=neg_thetas, cmap="Greens", s=1)
+    vis.gen_gif(True, "pcadist_theta", ax, stall=5, angle1=30, angles=None)
 
 # save
-bcs.pklsave(pos_dic, "pcadist", f"theta_pos_agent={specify+1}.pkl")
-bcs.pklsave(neg_dic, "pcadist", f"theta_neg_agent={specify+1}.pkl")
-bcs.npsave(np.array(pos_thetas), "pcadist", f"thetaval_pos_agent={specify+1}.npy")
-bcs.npsave(np.array(neg_thetas), "pcadist", f"thetaval_neg_agent={specify+1}.npy")
+bcs.pklsave(pos_dic, "pcadist", f"theta_pos_agent={specify+1}_save={save}.pkl")
+bcs.pklsave(neg_dic, "pcadist", f"theta_neg_agent={specify+1}_save={save}.pkl")
+bcs.npsave(np.array(pos_thetas), "pcadist", f"thetaval_pos_agent={specify+1}_save={save}.npy")
+bcs.npsave(np.array(neg_thetas), "pcadist", f"thetaval_neg_agent={specify+1}_save={save}.npy")

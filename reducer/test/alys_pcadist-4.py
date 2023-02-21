@@ -16,13 +16,14 @@ from sklearn.svm import LinearSVC, SVC
 
 # hypoerparameters
 specify = 0
-plane = "Cfp" # Cfp or theta
+plane = "theta" # Cfp or theta
 dots = "theta" # Cfp or theta or vfp
-tol = 0.3
+add = "_save=all"
+tol = 0.35
 
 # load results
-pCfp = bcs.pklload("pcadist", f"{plane}_pos_agent={specify+1}.pkl") # positive (odor) concentration fixed points
-nCfp = bcs.pklload("pcadist", f"{plane}_neg_agent={specify+1}.pkl") # negative
+pCfp = bcs.pklload("pcadist", f"{plane}_pos_agent={specify+1}{add}.pkl") # positive (odor) concentration fixed points
+nCfp = bcs.pklload("pcadist", f"{plane}_neg_agent={specify+1}{add}.pkl") # negative
 pvfp = bcs.pklload("pcadist", f"{dots}_pos_agent={specify+1}.pkl") # positive (wind) velocity fixed points
 nvfp = bcs.pklload("pcadist", f"{dots}_neg_agent={specify+1}.pkl") # negative
 
@@ -50,20 +51,20 @@ data = np.array(pCfp + nCfp)
 label = np.array(lpCfp + lnCfp)
 
 # perform SVM
-clf = SVC(gamma="auto")
-clf.fit(data, label)
-print("Score: ", clf.score(data, label))
+clf = LinearSVC()
+clf.fit(data[:,:5], label)
+print("Score: ", clf.score(data[:,:5], label))
 
-# extract "linear" version of nonlinear plane
-Z = lambda X, Y: (-clf.intercept_[0]-clf.coef_[0][0]*X-clf.coef_[0][1]*Y) / clf.coef_[0][2]
-minx, maxx = min(data.T[0])-1, max(data.T[1])+1
-miny, maxy = min(data.T[1])-1, max(data.T[1])+1
-X, Y = np.meshgrid(np.linspace(minx, maxx, 20), np.linspace(miny, maxy, 20))
+# # extract "linear" version of nonlinear plane
+# Z = lambda X, Y: (-clf.intercept_[0]-clf.coef_[0][0]*X-clf.coef_[0][1]*Y) / clf.coef_[0][2]
+# minx, maxx = min(data.T[0])-1, max(data.T[1])+1
+# miny, maxy = min(data.T[1])-1, max(data.T[1])+1
+# X, Y = np.meshgrid(np.linspace(minx, maxx, 20), np.linspace(miny, maxy, 20))
 
-# plot
-fig = plt.figure()
-ax = fig.add_subplot(111, projection="3d")
-ax.plot_surface(X, Y, Z(X, Y), alpha=0.5)
-ax.scatter(*np.array(pvfp).T, color="c", s=1, alpha=0.2)
-ax.scatter(*np.array(nvfp).T, color="m", s=1, alpha=0.2)
-vis.gen_gif(True, f"pcadist_{plane}_{dots}", ax, stall=5, angle1=30, angles=None)
+# # plot
+# fig = plt.figure()
+# ax = fig.add_subplot(111, projection="3d")
+# ax.plot_surface(X, Y, Z(X, Y), alpha=0.5)
+# ax.scatter(*np.array(pvfp).T, color="c", s=1, alpha=0.2)
+# ax.scatter(*np.array(nvfp).T, color="m", s=1, alpha=0.2)
+# vis.gen_gif(True, f"pcadist_{plane}_{dots}", ax, stall=5, angle1=30, angles=None)

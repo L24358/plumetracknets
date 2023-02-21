@@ -245,6 +245,12 @@ def gen_gif(gen_fig, foldername, ax, stall=5, angle1=30, angles=None):
 #                  Helper Functions                    #
 ########################################################
 
+def simpleaxis(ax):
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
+    ax.get_xaxis().tick_bottom()
+    ax.get_yaxis().tick_left()
+
 def draw_unit_circle(ax):
     """Plots a dashed unit circle on the axis `ax`."""
     t = np.linspace(0, 2*np.pi, 100)

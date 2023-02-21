@@ -2,6 +2,7 @@ import os
 import pickle
 import numpy as np
 import reducer.support.navigator as nav
+from itertools import product
 from sklearn.metrics.cluster import mutual_info_score as MIscore
 from sklearn.metrics.cluster import normalized_mutual_info_score as aMIscore
 from reducer.config import modelpath, graphpath
@@ -70,6 +71,14 @@ def pklload(*args):
     f.close()
     return data
 
+def sort_by_val(x):
+    return {k: v for k, v in sorted(x.items(), key=lambda item: item[1], reverse=True)}
+
+def update_by_add(dic1, dic2):
+    dic3 = {}
+    for key in dic1.keys(): dic3[key] = dic1[key] + dic2[key]
+    return dic3
+
 ########################################################
 #                Very Specific Functions               #
 ########################################################
@@ -79,6 +88,25 @@ def concat_dic_values(dic):
     for key in sorted(dic.keys()):
         res += list(dic[key])
     return res
+
+def strip_rp(l):
+    new = []
+    prev = None
+    for t in range(len(l)):
+        if l[t] != prev:
+            new.append(l[t])
+            prev = l[t]
+    return new
+
+def get_grams(l, elements, n=2): # only works if len(elements) is small, else too expensive
+    dic = {}
+    grams = product(elements, repeat=n)
+    for gram in grams: dic[gram] = 0
+
+    for i in range(len(l)-n+1):
+        pair = tuple(l[i:i+n])
+        dic[pair] += 1
+    return dic
 
 ########################################################
 #                   Loading Functions                  #
