@@ -30,7 +30,7 @@ idxs = np.where(C > 0)[0]
 angles = np.arctan2(vy, vx)
 fps = pca.inverse_transform(fp_pcas)
 fp_actions = dy.get_action_from_h(specify, fps, return_info=False)
-fp_thetas = fp_actions.T[1]
+fp_rs, fp_thetas = fp_actions.T
 
 # sort and average
 ival = np.pi / (gsize//2)

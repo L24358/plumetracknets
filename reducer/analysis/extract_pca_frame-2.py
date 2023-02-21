@@ -8,7 +8,7 @@ import reducer.support.visualization as vis
 from sklearn.decomposition import PCA
 
 # hyperparameters
-specify = 0
+specify = 2
 tpe = "constant"
 n = 64
 
