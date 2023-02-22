@@ -28,7 +28,7 @@ info = [] # contains information: (vx, vy, C, r, theta)
 for episode in range(240):
     dic = bcs.simulation_loader(specify, tpe, episode=episode)
     actions = dic["actions"]
-    actions = dy.transform_actions(actions)
+    actions = dy.transform_actions(actions) # ACTIONS are already transformed!
     observations = dic["observations"]
 
     for t in range(0, len(actions)):

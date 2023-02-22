@@ -1,4 +1,14 @@
 """
+@ instructions:
+    - to plot vfp with pos/neg graident colors:
+        gifname = "pcadist_vfp"
+        groups = [vangle_pos, vangle_neg]
+        cmaps = ["Greens", "Reds"]
+    - to plot r with gradient colors:
+        gifname = "pcadist_r"
+        groups = [rlength]
+        cmaps = ["cool"]
+
 @ references:
     - Matplotlib colormaps: https://matplotlib.org/stable/tutorials/colors/colormaps.html
 """
@@ -34,12 +44,16 @@ def vangle_0_2pi(info):
     nmask = angle < 0
     return True, (np.multiply(angle, pmask) + np.multiply(2*np.pi - angle, nmask)) / (2*np.pi) # normalize
 
+def rlength(info):
+    vx, vy, C, r, theta = info # unpack
+    return r > 0, r / rmax
+
 # hyperparameters
 specify = 0
 tpe = "constant"
-gifname = "pcadist_vfp"
-groups = [vangle_pos, vangle_neg]
-cmaps = ["Greens", "Reds"]
+gifname = "pcadist_r"
+groups = [rlength]
+cmaps = ["cool"]
 assert len(groups) == len(cmaps)
 
 # loading data
@@ -50,6 +64,7 @@ info = bcs.npload("pcadist", f"fppcainfo_agent={specify+1}_save=pca64.npy")
 
 # calculate args
 Cmax = max(info.T[2])
+rmax = max(info.T[3])
 
 # main: generate gifs
 ax = plt.figure().add_subplot(projection="3d")

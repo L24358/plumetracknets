@@ -17,10 +17,10 @@ from reducer.config import modelpath, graphpath
 # parameters
 simulate_fp = False
 use_alltrajs = False
-use_simulation = True
+use_simulation = False
 clip = False
 specify = 0
-episode = 82
+episode = 16
 foldername = f"fixed_point_t_episode={episode}"
 
 # Load model

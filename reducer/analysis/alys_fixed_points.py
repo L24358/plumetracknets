@@ -17,9 +17,9 @@ from reducer.config import modelpath
 # parameters
 simulate_fp = False
 use_alltrajs = False
-use_simulation = True
+use_simulation = False
 specify = 0
-episode = 5
+episode = 16
 
 # Load model
 rnn, inn, br, bi = bcs.model_loader(specify=specify) 

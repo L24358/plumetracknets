@@ -151,7 +151,7 @@ def get_trajectory2(actions):
         locs.append(new_loc)
     return np.vstack(locs), np.array(angles), actions
 
-def get_action_from_h(specify, hs, return_info=False):
+def get_action_from_h(specify, hs, return_info=False, transform=False):
     # cast to type Tensor
     if type(hs) == torch.Tensor: pass
     else: hs = torch.from_numpy(np.array(hs).astype(np.float32))
@@ -162,9 +162,11 @@ def get_action_from_h(specify, hs, return_info=False):
 
     if not return_info:
         actions = actor(hs).squeeze().detach().numpy()
+        if transform: actions = transform_actions(actions)
         return actions
     else:
         ah1, ah2, actions = actor(hs, return_info=True)
+        if transform: actions = transform_actions(actions)
         ah1 = ah1.squeeze().detach().numpy()
         ah2 = ah2.squeeze().detach().numpy()
         actions = actions.squeeze().detach().numpy()

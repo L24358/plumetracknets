@@ -19,7 +19,7 @@ from reducer.config import modelpath, graphpath
 start_dic = {38: 30, 16: 0, 21:20, 91:50}
 simulate_fp = False
 specify = 0
-episode = 21
+episode = 16
 start = start_dic[episode]
 foldername = f"fixed_point_t_episode={episode}"
 
