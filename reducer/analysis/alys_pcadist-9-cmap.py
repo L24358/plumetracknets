@@ -8,6 +8,10 @@
         gifname = "pcadist_r"
         groups = [rlength]
         cmaps = ["cool"]
+    - to plot behavior regimes with solid colors:
+        gifname = "pcadist_regimes"
+        groups = [track, recovery, lost]
+        cmaps = ["Greens", "Blues", "Reds"]
 
 @ references:
     - Matplotlib colormaps: https://matplotlib.org/stable/tutorials/colors/colormaps.html
@@ -24,36 +28,51 @@ from sklearn.decomposition import PCA
 
 # define the label groups and colors
 def concentration(info):
-    vx, vy, C, r, theta = info # unpack
+    vx, vy, C, r, theta = info[:5] # unpack
     return C > 0, C/Cmax
 
 def vangle_pos(info):
-    vx, vy, C, r, theta = info # unpack
+    vx, vy, C, r, theta = info[:5] # unpack
     angle = np.arctan2(vy, vx)
     return angle > 0, abs(angle / np.pi)
 
 def vangle_neg(info):
-    vx, vy, C, r, theta = info # unpack
+    vx, vy, C, r, theta = info[:5] # unpack
     angle = np.arctan2(vy, vx)
     return angle < 0, abs(angle / np.pi)
 
 def vangle_0_2pi(info):
-    vx, vy, C, r, theta = info # unpack
+    vx, vy, C, r, theta = info[:5] # unpack
     angle = np.arctan2(vy, vx)
     pmask = angle >= 0
     nmask = angle < 0
     return True, (np.multiply(angle, pmask) + np.multiply(2*np.pi - angle, nmask)) / (2*np.pi) # normalize
 
 def rlength(info):
-    vx, vy, C, r, theta = info # unpack
+    vx, vy, C, r, theta = info[:5] # unpack
     return r > 0, r / rmax
+
+def track(info):
+    epi, t = info[5:] # unpack
+    epi, t = int(epi), int(t)
+    return regime[epi]["tracking"][t], "g"
+
+def recovery(info):
+    epi, t = info[5:] # unpack
+    epi, t = int(epi), int(t)
+    return regime[epi]["recovery"][t], "b"
+
+def lost(info):
+    epi, t = info[5:] # unpack
+    epi, t = int(epi), int(t)
+    return regime[epi]["lost"][t], "r"
 
 # hyperparameters
 specify = 0
 tpe = "constant"
-gifname = "pcadist_r"
-groups = [rlength]
-cmaps = ["cool"]
+gifname = "pcadist_regimes"
+groups = [track, recovery, lost]
+cmaps = [None, None, None]
 assert len(groups) == len(cmaps)
 
 # loading data
@@ -61,6 +80,7 @@ pca_dic = bcs.pklload("pca_frame", f"pcaskl_agent={specify+1}_n=64.pkl")
 pca = pca_dic["pca"]
 fp_pcas = bcs.npload("pcadist", f"fppca_agent={specify+1}_save=pca64.npy")
 info = bcs.npload("pcadist", f"fppcainfo_agent={specify+1}_save=pca64.npy")
+regime = bcs.pklload("regimes", f"regime_agent={specify+1}.pkl")
 
 # calculate args
 Cmax = max(info.T[2])
@@ -80,5 +100,6 @@ for g in range(len(groups)):
 
     # plot
     coors = np.array(fps)[:,:3].T
-    ax.scatter(*coors, c=labels, cmap=cmaps[g], s=3)
+    if cmaps[g] != None: ax.scatter(*coors, c=labels, cmap=cmaps[g], s=3)
+    else: ax.scatter(*coors, color=labels, s=3)
 vis.gen_gif(True, gifname, ax, stall=5, angle1=30, angles=None)

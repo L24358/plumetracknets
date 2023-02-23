@@ -12,7 +12,7 @@ import reducer.support.visualization as vis
 from sklearn.decomposition import PCA
 
 # hyperparameters
-specify = 2
+specify = 0
 tpe = "constant"
 to_save = "pca64"
 
@@ -42,7 +42,10 @@ for episode in range(240):
         # append info
         fp_pcas.append(fps_pca)
         for _ in range(len(fps)): # append the same thing #fps times
-            info.append( np.append(observations[t], actions[t]) )
+            to_record = np.append(
+                np.append(observations[t], actions[t]),
+                np.array([episode, t]))
+            info.append(to_record)
 
 # save
 fp_pcas = np.vstack(fp_pcas)
