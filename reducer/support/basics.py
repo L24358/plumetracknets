@@ -108,6 +108,13 @@ def get_grams(l, elements, n=2): # only works if len(elements) is small, else to
         dic[pair] += 1
     return dic
 
+def get_regime(dic_regime, epi, t, vals=["tracking", "recovery", "lost"]):
+    dic = {"tracking": vals[0], "recovery": vals[1], "lost": vals[2]}
+    epi, t = int(epi), int(t)
+    for reg in ["tracking", "recovery", "lost"]:
+        if dic_regime[epi][reg][t]: return dic[reg]
+    raise bcs.AlgorithmError()
+
 ########################################################
 #                   Loading Functions                  #
 ########################################################

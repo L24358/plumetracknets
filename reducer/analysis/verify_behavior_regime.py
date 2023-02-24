@@ -14,7 +14,8 @@ from matplotlib.colors import ListedColormap, BoundaryNorm
 
 specify = 0
 tpe = "constant"
-regime = bcs.pklload("regimes", f"regime_agent={specify+1}.pkl")
+c1, c2 = 12, 25
+regime = bcs.pklload("regimes", f"regime_agent={specify+1}_criterion=({c1},{c2}).pkl")
 
 for episode in range(240):
     dic = bcs.simulation_loader(specify, tpe, episode=episode)
@@ -43,4 +44,4 @@ for episode in range(240):
     lc.set_linewidth(2)
     line = axs[1].add_collection(lc)
     fig.colorbar(line, ax=axs[1])
-    vis.savefig(figname=bcs.fjoin("behavior_regime", f"agent={specify+1}_episode={episode}.png", tpe=2))
+    vis.savefig(figname=bcs.fjoin(f"behavior_regime_criterion=({c1},{c2})", f"agent={specify+1}_episode={episode}.png", tpe=2))
