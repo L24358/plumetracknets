@@ -1,5 +1,5 @@
 """
-Perform ahstar.py, ahstar-2.py, except pooled over all trials
+Perform ahstar.py, ahstar-2.py, except pooled over all trials. Extends ahstar3 by adding an additional scatterplot.
 """
 import os 
 import torch
@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 import reducer.support.basics as bcs
 import reducer.support.dynamics as dy
 import reducer.support.visualization as vis
-from alys_ahstar import get_fixed_point_action
+from alys_ahstar1 import get_fixed_point_action
 from alys_ahstar2 import get_agent_history_for_fp, get_abs_wind_angle, mask_by_odor
 
 # hyperparameters
@@ -57,7 +57,7 @@ for episode in episodes:
     centerlines.append(centerline)
     masks.append(mask)
     
-# plot alys-1
+# plot alys-1: density diagram for a(h^*)-phi vs a(h)-phi
 instants = np.array(instants).flatten()
 noninstants = np.array(noninstants).flatten()
 maxx = max(list(instant) + list(noninstant))
@@ -67,7 +67,7 @@ sns.kdeplot(x=instants, y=noninstants, cmap="Reds", shade=True, bw_adjust=.5, cb
 ax.set_xlabel("$a(h_t^*) - $\u03C6"); ax.set_ylabel("$a(h_t) - $\u03C6")
 vis.savefig(figname=f"ahstar1_agent={specify+1}_all.png")
 
-# plot alys-2
+# plot alys-2: histogram for a(h^*) vs a(h)
 fig = plt.figure(figsize=(3*3, 3*3))
 idx = idx_by_sum(masks)[:9]
 for i in range(9):
@@ -79,7 +79,7 @@ for i in range(9):
 plt.legend()
 vis.savefig(figname=f"ahstar2_agent={specify+1}_all.png")
 
-# plot alys-2
+# plot alys-2: scatter plot for a(h^*) vs a(h)
 mse_reals = []
 mse_stars = []
 for i in range(len(centerlines)):

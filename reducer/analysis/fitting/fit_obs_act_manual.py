@@ -1,8 +1,6 @@
 """
 Fit observations and actions to constant and oscillatory functions. (Manually)
-
-@ Reason:
-    - To simplify the inputs for the RNN.
+This is to simplify the inputs for the RNN.
 """
 
 import os

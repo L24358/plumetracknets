@@ -27,8 +27,6 @@ fs = nav.file_finder()
 print(fs)
 # mdl = torch.load(f, map_location=torch.device('cpu'))[-1]
 
-
-
 # hyperparameters
 specify = 0
 tpe = "constant"

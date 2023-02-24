@@ -1,10 +1,7 @@
 """
 Plot observations, actions and trajectory together for comparison.
 
-@ Reason:
-    - Simplify input into RNN
-
-@ Conclusion:
+Conclusion:
     - "Track" seems to consist of oscillatory obs and actions, e.g. episode 65 
     - "Lost" seems to consist of constant obs and high-freq oscillatory actions, e.g. episode 26, 213
     - "Recovery" -- unclear, e.g. episode 228

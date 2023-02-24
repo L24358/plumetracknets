@@ -1,3 +1,7 @@
+"""
+Tests if recovery is biased in terms of agent angle (at the onset of recovery).
+"""
+
 import os
 import pickle
 import numpy as np

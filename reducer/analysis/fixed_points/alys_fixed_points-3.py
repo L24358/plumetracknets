@@ -1,5 +1,5 @@
 '''
-Plot fixed points in terms of the instantaneous inputs, evolving in time.
+Plot fixed points in terms of the instantaneous inputs, evolving in time. Also plots sign(wind angle) and sign(agent angle).
 '''
 
 import os
@@ -29,7 +29,7 @@ sim_results = bcs.simulation_loader(specify, "constant", episode=episode)
 observations = sim_results["observations"]
 hrnn = sim_results["activities_rnn"]
 actions = sim_results["actions"]
-actions = dy.transform_actions(actions)
+actions = dy.transform_actions(actions) # Transform actions!
 
 # pca
 pca_dic = bcs.pklload("pca_frame", f"pcaskl_agent={specify+1}_n=3.pkl")
@@ -41,7 +41,6 @@ min2, max2 = min(x2) - 1, max(x2) + 1
 min3, max3 = min(x3) - 1, max(x3) + 1
 
 # plot in time
-# angles = [round(i,0) for i in np.linspace(-180, 180, len(observations) - start)]
 angles = list(np.ones(len(observations) - start)*29)
 count = 0
 for t in range(start, len(observations)):

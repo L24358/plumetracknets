@@ -1,7 +1,7 @@
 '''
 Analysis of:
-        - 1. Eigenvalues of the recurrent matrix W_r
-        - 2. dot(eigenvectors, input matrix columns)
+    1. Eigenvalues of the recurrent matrix W_r
+    2. dot(eigenvectors, input matrix columns)
 '''
 
 import os

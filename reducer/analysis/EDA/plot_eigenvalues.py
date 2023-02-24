@@ -1,5 +1,5 @@
 '''
-Plot fixed points in terms of the instantaneous inputs.
+Plot eigenvalues for all time points in an episode.
 '''
 
 import os

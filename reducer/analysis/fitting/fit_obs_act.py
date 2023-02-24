@@ -1,11 +1,8 @@
 """
 Fit observations and actions to constant and oscillatory functions.
 
-@ Reason:
-    - To simplify the inputs for the RNN.
-
-@ Results:
-    - No general way of fitting all functions. Might need to manually fit individual trials.
+Results:
+    No general way of fitting all functions. Might need to manually fit individual trials.
 """
 
 import numpy as np

@@ -1,5 +1,5 @@
 """
-@ instructions:
+Instructions:
     - to plot vfp with pos/neg graident colors:
         gifname = "pcadist_vfp"
         groups = [vangle_pos, vangle_neg]
@@ -13,7 +13,7 @@
         groups = [track, recovery, lost]
         cmaps = ["Greens", "Blues", "Reds"]
 
-@ references:
+References:
     - Matplotlib colormaps: https://matplotlib.org/stable/tutorials/colors/colormaps.html
 """
 

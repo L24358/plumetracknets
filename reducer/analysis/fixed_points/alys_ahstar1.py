@@ -1,3 +1,7 @@
+"""
+Plot instant wind angle difference (a(h^*) - phi) versus noninstant (a(h) - phi).
+"""
+
 import os 
 import torch
 import numpy as np
@@ -8,6 +12,12 @@ import reducer.support.visualization as vis
 
 # define class, functions for convenience
 def get_closest_stable_fp(fps, h, args):
+    """Get the fixed point closest to the current location (Eucledian distance).
+    
+    Returns:
+        np.ndarray or None: Fixed point. np.ndarray if fixed point is found, else None.
+        bool: Flag. False if stable fixed point is found, else True.
+    """
     if len(fps) > 1: # if there are multiple fps to choose from, return closest fp and flag=False
         stable = [dy.get_stability(fp, args) for fp in fps]
         if np.any(stable):
@@ -15,8 +25,8 @@ def get_closest_stable_fp(fps, h, args):
             diffs = [np.linalg.norm(fp - h) for fp in fps]
             idx = diffs.index(min(diffs))
             return fps[idx], False
-        else:
-            return None, True # if none of the fixed points are stable
+        else: # if none of the fixed points are stable
+            return None, True 
     elif len(fps) == 1: # if there is only one, return only fp and flag=is_stable
         stable = dy.get_stability(fps[0], args)
         if not stable: print("Warning: only single unstable fixed point exists!")
@@ -26,6 +36,7 @@ def get_closest_stable_fp(fps, h, args):
         return None, True    
 
 def get_fixed_point_wrap(observations, t, args, hs, count=0, rp=100):
+    """Recurrently calls self until fixed point is found, or max_iter is reached."""
     x = observations[t]
     args = [x] + args
     fps = dy.get_fixed_points(*args, rp=rp)
@@ -40,11 +51,13 @@ def get_fixed_point_wrap(observations, t, args, hs, count=0, rp=100):
         else: return get_fixed_point_wrap(observations, t, args, hs, count=count+1, rp=500) # try again
 
 def get_averaged_wind_angle(ego_wind_angles, tau):
-    expfilter = lambda t, tau: np.exp(-t/tau) # Do I need to flip this?
+    """Get wind angle average with exponentially weighted filter."""
+    expfilter = lambda t, tau: np.exp(-t/tau)
     filter = expfilter(np.arange(len(ego_wind_angles)), tau)
     return np.convolve(ego_wind_angles, filter)[:len(ego_wind_angles)]
 
-def get_fixed_point_action(observations, actions, hs, args): # get fixed point actions, a(h_t^*)
+def get_fixed_point_action(observations, actions, hs, args):
+    """Get fixed point actions, i.e. a(h_t^*)"""
     h_sequence = []
     fp_sequence = []
     ego_wind_angles = []
@@ -100,12 +113,13 @@ if __name__ == "__main__":
     instant = np.min([instant, abs(2*np.pi - instant)], axis=0)
     noninstant = np.min([noninstant, abs(2*np.pi - noninstant)], axis=0)
 
+    # plot
     maxx = max(list(instant) + list(noninstant))
     ax = plt.figure().add_subplot(111)
     ax.plot([0, maxx], [0, maxx], "k--")
     vis.plot_scatter(instant, noninstant, figname=f"ahstar_agent={specify+1}.png", xlabel="$a(h_t^*)$", ylabel="$a(h_t)$", color="b", ax=ax, s=5)
 
-    # mutual information
+    # mutual information, DEPRECATED.
     if 0:
         tau = 7
         numstate = 10

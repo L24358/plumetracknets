@@ -1,5 +1,7 @@
 """
-@ references:
+Plot fixed point agent angle a_theta(h^*) as a function of wind direction phi. Sorted by regimes.
+
+References:
     - Matplotlib colormaps: https://matplotlib.org/stable/tutorials/colors/colormaps.html
 """
 
@@ -63,9 +65,9 @@ mean2 = [np.mean(means["recovery"][i]) for i in range(gsize - 1)]
 # plot
 ax = plt.figure().add_subplot(111)
 vis.simpleaxis(ax)
-plt.scatter(angles[idxs["tracking"]], target[idxs["tracking"]], s=1, alpha=0.3, color="lightgreen")
+plt.scatter(angles[idxs["tracking"]], target[idxs["tracking"]], s=1, alpha=0.5, color="lightgreen")
 plt.scatter(angles[idxs["recovery"]], target[idxs["recovery"]], s=1, alpha=0.3, color="lightsteelblue")
-# plt.scatter(angles[idxs["lost"]], target[idxs["lost"]], s=1, alpha=0.3, color="pink")
+plt.scatter(angles[idxs["lost"]], target[idxs["lost"]], s=1, alpha=0.3, color="pink")
 plt.plot(wind_grid_mean, mean, color="g", marker='o')
 plt.plot(wind_grid_mean, mean2, color="b", marker='o')
 plt.plot([-np.pi/2, -np.pi/2], [min(target[idxs["tracking"]]), max(target[idxs["tracking"]])], "k--") 

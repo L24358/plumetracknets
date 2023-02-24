@@ -1,6 +1,7 @@
 """
 Identify behavior regime based on actions and observations.
 """
+
 import os 
 import numpy as np
 import matplotlib.pyplot as plt

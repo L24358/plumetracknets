@@ -1,3 +1,7 @@
+"""
+Plot centerline versus distribution of agent angle (for both real and fixed points), DEPRECATED.
+"""
+
 import os 
 import torch
 import numpy as np
@@ -6,7 +10,7 @@ import reducer.support.basics as bcs
 import reducer.support.dynamics as dy
 import reducer.support.visualization as vis
 
-# define class, functions for convenience
+# define class, functions for convenience (repeats from alys_ahstar)
 def get_closest_stable_fp(fps, h, args):
     if len(fps) > 1: # if there are multiple fps to choose from, return closest fp and flag=False
         stable = [dy.get_stability(fp, args) for fp in fps]
@@ -94,7 +98,7 @@ if __name__ == "__main__":
     # hyperparameters
     specify = 0
     tpe = "constant"
-    episode = "random" #128, 153
+    episode = "random" # good trials: 128, 153
 
     # load data
     rnn, inn, br, bi = bcs.model_loader(specify=specify) 

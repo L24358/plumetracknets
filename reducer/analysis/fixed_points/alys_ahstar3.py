@@ -1,6 +1,7 @@
 """
-Perform ahstar.py, ahstar-2.py, except pooled over all trials
+Perform ahstar.py, ahstar-2.py, except pooled over all trials, DEPRECATED: see ahstar4.
 """
+
 import os 
 import torch
 import numpy as np
@@ -8,7 +9,7 @@ import matplotlib.pyplot as plt
 import reducer.support.basics as bcs
 import reducer.support.dynamics as dy
 import reducer.support.visualization as vis
-from alys_ahstar import get_fixed_point_action
+from alys_ahstar1 import get_fixed_point_action
 from alys_ahstar2 import get_agent_history_for_fp, get_abs_wind_angle, mask_by_odor
 
 # hyperparameters
@@ -24,7 +25,9 @@ def adjust_mask(mask, exclude):
 instants, noninstants = [], []
 history_real, history_star = [], []
 centerlines = []
-for episode in range(178,179): # 178 is excluded
+episodes = list(range(240))
+episodes.pop(178) # that one is not ran
+for episode in episodes:
 
     # load data
     rnn, inn, br, bi = bcs.model_loader(specify=specify) 

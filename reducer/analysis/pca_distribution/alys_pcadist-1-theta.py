@@ -1,3 +1,7 @@
+"""
+Extracts a_theta(h), both the sign and magnitude.
+"""
+
 import os
 import pickle
 import numpy as np

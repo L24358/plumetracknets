@@ -1,5 +1,5 @@
 """
-Label the trajectory in terms of the 8 factions.
+Label the trajectory in terms of the 8 factions or 4 quadrents, and find the trigrams.
 """
 
 import os

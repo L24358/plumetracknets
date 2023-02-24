@@ -1,7 +1,7 @@
 """
 Nonlinear SVM on odor concentration fixed points (Cfp) and wind concentration fixed points (vfp).
 
-@ notes:
+Notes:
     - LinearSVC on theta (in -4.py) score, tol=0.0: 0.587
     - LinearSVC on Cfp used on theta score: 0.588
     - rbf on theta (in -4.py) score, tol=0.0: 0.642
