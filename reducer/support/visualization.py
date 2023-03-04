@@ -3,6 +3,7 @@ import tqdm
 import imageio
 import numpy as np
 import seaborn as sns
+import pylab as pl
 import matplotlib.pyplot as plt
 import reducer.support.dynamics as dy
 from sklearn.decomposition import PCA
@@ -46,7 +47,7 @@ def plot_trajectory(trajectory, figname="temp.png", save=True, plot_time=True, a
     @ Kwargs:
         - color: str, default="k"
     """
-    kw = {"color": "k", "xlabel": "x", "ylabel": "y", "subtitle": ""}
+    kw = {"color": "k", "xlabel": "x", "ylabel": "y", "subtitle": "", "T": len(trajectory)}
     kw.update(kwargs)
 
     if ax == None: ax = plt.figure().add_subplot(111, projection="3d")
@@ -296,4 +297,11 @@ def savefig(figname="temp.png", clear=True, close=False, dpi=200):
     if clear: plt.clf()
     if close: plt.close("all")
 
-
+def colorbar_only(minn, maxx, name="viridis", figname="colorbar.png", orientation="vertical"):
+    if orientation == "vertical": figsize=(1.5, 9)
+    else: figsize=(9, 1.5)
+    pl.figure(figsize=figsize)
+    img = pl.imshow([[minn, maxx]], cmap=name)
+    pl.gca().set_visible(False)
+    pl.colorbar(orientation=orientation)
+    savefig(figname=figname)

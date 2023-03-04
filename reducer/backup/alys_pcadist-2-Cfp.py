@@ -11,8 +11,10 @@ from sklearn.decomposition import PCA
 
 specify = 0
 tpe = "constant"
+save = "all"
+n = 3 if save == "pca" else 64
 rnn, inn, br, bi = bcs.model_loader(specify=specify) 
-pca_dic = bcs.pklload("pca_frame", f"pcaskl_agent={specify+1}_n=3.pkl")
+pca_dic = bcs.pklload("pca_frame", f"pcaskl_agent={specify+1}_n={n}.pkl")
 pca = pca_dic["pca"]
 all_traj = pca_dic["all_traj"]
 episodes = bcs.track_dic_manual
@@ -53,5 +55,5 @@ ax.scatter(*neg, color="k", s=1)
 vis.gen_gif(True, "pcadist_Cfp", ax, stall=5, angle1=30, angles=None)
 
 # save
-bcs.pklsave(pos_dic, "pcadist", f"Cfp_pos_agent={specify+1}.pkl")
-bcs.pklsave(neg_dic, "pcadist", f"Cfp_neg_agent={specify+1}.pkl")
+bcs.pklsave(pos_dic, "pcadist", f"Cfp_pos_agent={specify+1}_save={save}.pkl")
+bcs.pklsave(neg_dic, "pcadist", f"Cfp_neg_agent={specify+1}_save={save}.pkl")

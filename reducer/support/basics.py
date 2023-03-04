@@ -154,7 +154,7 @@ def model_loader(specify="all"):
         return list(rnns.values())[specify]
     else: raise InputError(f"keyword `specify` does not support {specify}.")
 
-def actor_loader(specify="all"):
+def actor_loader(specify="all", verbose=True):
     nns = {}
     for mtype in ["base.actor1.0.weight", "base.actor1.0.bias", "base.actor.0.weight", "base.actor.0.bias",\
         "dist.fc_mean.weight", "dist.fc_mean.bias", "dist.logstd._bias"]:
@@ -175,10 +175,10 @@ def actor_loader(specify="all"):
     if specify == "all": return nns
     elif specify == "random":
         idx = np.random.choice(len(nns.keys()))
-        print(f"Loading model {idx}, i.e. seed={list(nns.keys())[idx]}")
+        if verbose: print(f"Loading model {idx}, i.e. seed={list(nns.keys())[idx]}")
         return list(nns.values())[idx]
     elif type(specify) == int:
-        print(f"Loading model {specify}, i.e. seed={list(nns.keys())[specify]}")
+        if verbose: print(f"Loading model {specify}, i.e. seed={list(nns.keys())[specify]}")
         return list(nns.values())[specify]
     else: raise InputError(f"keyword `specify` does not support {specify}.")
 

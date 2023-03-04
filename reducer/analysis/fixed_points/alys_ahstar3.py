@@ -39,14 +39,14 @@ for episode in episodes:
 
     # get egocentric and absolute wind direction, hs, and a(h)s
     h_sequence, fp_sequence, ego_wind_angles, ts_exclude = get_fixed_point_action(observations, actions, hs, [rnn,inn,br,bi])
-    actions_star = dy.get_action_from_h(specify, fp_sequence, return_info=False)
-    actions_real = dy.get_action_from_h(specify, h_sequence, return_info=False)
+    actions_star = dy.get_action_from_h(specify, fp_sequence, return_info=False, transform=True) # transform needs to be true!
+    actions_real = dy.get_action_from_h(specify, h_sequence, return_info=False, transform=True)
     mask = adjust_mask(mask, ts_exclude)
 
     # calculate (instant = phi - theta) and (noninstant = phi - theta*)
     instant = abs(actions_star[:,1] - ego_wind_angles)
     noninstant = abs(actions_real[:,1] - ego_wind_angles)
-    instant = np.min([instant, abs(2*np.pi - instant)], axis=0)
+    instant = np.min([instant, abs(2*np.pi - instant)], axis=0) # takes the smaller angle
     noninstant = np.min([noninstant, abs(2*np.pi - noninstant)], axis=0)
     instant, noninstant = mask_by_odor(mask, instant, noninstant)
     instants += list(instant)
@@ -77,7 +77,7 @@ noninstants = np.array(noninstants).flatten()
 maxx = max(list(instant) + list(noninstant))
 ax = plt.figure().add_subplot(111)
 ax.plot([0, maxx], [0, maxx], "k--")
-vis.plot_scatter(instants, noninstants, figname=f"ahstar1_agent={specify+1}_all.png", xlabel="$a(h_t^*)$", ylabel="$a(h_t)$", color="b", ax=ax)
+vis.plot_scatter(instants, noninstants, figname=f"ahstar1_agent={specify+1}_all.png", xlabel="$a_\u03B8(h_t^*)$", ylabel="$a_\u03B8(h_t)$", color="b", ax=ax)
 
 # plot alys-2
 counts1, _, _ = plt.hist(history_real, color="b", alpha=0.5)

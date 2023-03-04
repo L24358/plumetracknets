@@ -66,12 +66,15 @@ for t in range(len(observations)):
     # plot fixed points and trajectory
     ax = plt.figure().add_subplot(projection="3d")
     fps_pca = pca.transform(fps)
-    ax.scatter(*fps_pca.T, color=color[t])
+    ax.scatter(*fps_pca.T, color='k') # originally: color[t]
     vis.plot_trajectory(y_pca.T[:,:t], save=False, ax=ax, projection="3d")
 
     # save
-    ax.view_init(30, angles[t])
+    ax.view_init(30, 47) # originally: angles[t]
+    ax.set_xlabel("PCA dim 1"); ax.set_ylabel("PCA dim 2"); ax.set_zlabel("PCA dim 3")
+    ax.set_xlim(-2.5, 2.5); ax.set_ylim(-2, 2.0); ax.set_zlim(-1, 2.0)
     if not os.path.exists(os.path.join(graphpath, foldername)): os.mkdir(os.path.join(graphpath, foldername))
     vis.savefig(figname=f"{foldername}/{round(angles[t],0)}.png", close=True)
 
 vis.gen_gif(False, foldername, None, stall=5, angles=angles)
+vis.colorbar_only(0, len(observations))

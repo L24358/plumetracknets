@@ -15,7 +15,7 @@ from sklearn.decomposition import PCA
 # hyperparameters
 specify = 0
 tpe = "constant"
-c1, c2 = 12, 25
+c1, c2 = 5, 12
 
 # loading data
 fp_pcas = bcs.npload("pcadist", f"fppca_agent={specify+1}_save=pca64.npy")

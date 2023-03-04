@@ -27,12 +27,19 @@ T = 1000
 seed = np.random.randint(0, high=99999) 
 
 # set np seed
-np.random.seed(seed) # good values: 7537, 98358, 24298
+np.random.seed(seed) # decent values: 43287, 35190, 91475
 print("seed: ", seed)
 
 # load agent
 rnn, inn, br, bi = bcs.model_loader(specify=specify)
 fit_dic = bcs.fit_loader(specify, episode)
+
+# modify fit_dic
+fit_dic["C"][0][-2:] = [0, 0]
+fit_dic["y"][0][-2:] = [0, 0]
+fit_dic["x"][0][-2:] = [0, 0]
+
+# get observations
 observations = bcs.FitGenerator(fit_dic).generate(np.arange(T))
 observations += np.random.normal(0, 0, size=observations.shape)
 if clip: observations = np.clip(observations, 0, 1) # clip odor concentration values

@@ -151,12 +151,13 @@ def get_trajectory2(actions):
         locs.append(new_loc)
     return np.vstack(locs), np.array(angles), actions
 
-def get_action_from_h(specify, hs, return_info=False, transform=False):
+def get_action_from_h(specify, hs, return_info=False, transform=False, verbose=False):
     # cast to type Tensor
     if type(hs) == torch.Tensor: pass
     else: hs = torch.from_numpy(np.array(hs).astype(np.float32))
+    if not transform: print("CAUTION: actions are NOT transformed!")
 
-    dic = bcs.actor_loader(specify=specify)
+    dic = bcs.actor_loader(specify=specify, verbose=verbose)
     actor = Actor()
     actor.init_params(dic)
 

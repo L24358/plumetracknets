@@ -92,7 +92,7 @@ if __name__ == "__main__":
     # hyperparameters
     specify = 0
     tpe = "constant"
-    episode = "random"
+    episode = 39 #"random"
 
     # load data
     rnn, inn, br, bi = bcs.model_loader(specify=specify) 
@@ -106,8 +106,8 @@ if __name__ == "__main__":
     h_sequence, fp_sequence, ego_wind_angles, _ = get_fixed_point_action(observations, actions, hs, args)
 
     # compare
-    actions_star = dy.get_action_from_h(specify, fp_sequence, return_info=False)
-    actions = dy.get_action_from_h(specify, h_sequence, return_info=False)
+    actions_star = dy.get_action_from_h(specify, fp_sequence, return_info=False, transform=True)
+    actions = dy.get_action_from_h(specify, h_sequence, return_info=False, transform=True)
     instant = abs(actions_star[:,1] - ego_wind_angles)
     noninstant = abs(actions[:,1] - ego_wind_angles)
     instant = np.min([instant, abs(2*np.pi - instant)], axis=0)

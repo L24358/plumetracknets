@@ -26,9 +26,10 @@ clip = False
 same_ic = True
 thre = 1e-07
 T = 1000
-noise_perc = 0.01
+noise_perc = 0.3
 seed = np.random.randint(0, high=99999) 
 save = True
+start = 0
 
 # overwrite by argv: seed, noise_perc, save
 if len(sys.argv) > 1:
@@ -37,16 +38,22 @@ if len(sys.argv) > 1:
     save = int(sys.argv[3])
 
 # set np seed
-np.random.seed(seed) # good values: 7537, 98358, 24298, 25
+np.random.seed(seed) # good values: 7537, 98358, 24298 (old); 35028, 63015 (new)
 print("seed: ", seed)
 
 # load agent
 rnn, inn, br, bi = bcs.model_loader(specify=specify)
 fit_dic = bcs.fit_loader(specify, episode)
 
-def get_traj_obs(fit_dic):
+# modify fit_dic
+fit_dic["C"][0][-2:] = [0, 0]
+fit_dic["y"][0][-2:] = [0, 0]
+fit_dic["x"][0][-2:] = [0, 0]
+
+def get_traj_obs(fit_dic, start=0):
     observations = bcs.FitGenerator(fit_dic).generate(np.arange(T))
-    noise_std = abs(np.mean(observations, axis=0))*noise_perc
+    noise_std = abs(np.std(observations, axis=0))*noise_perc
+    print("Noise std: ", noise_std)
     observations += np.random.normal([0,0,0], noise_std, size=observations.shape)
     if clip: observations = np.clip(observations, 0, 1) # odor concentration values clip 
 
@@ -59,12 +66,12 @@ def get_traj_obs(fit_dic):
         obs.append(observations)
     trajs = np.vstack(trajs)
     obs = np.vstack(obs)
-    return trajs, obs, h_0
+    return trajs[start:], obs[start:], h_0
 
 def MSE(traj1, traj2, start=0): return np.mean(pow(traj1[start:] - traj2[start:], 2))
 
 # perform PCA on trajectories
-trajs, obs, h_0 = get_traj_obs(fit_dic)
+trajs, obs, h_0 = get_traj_obs(fit_dic, start=start)
 pca = PCA(n_components=pca_dim)
 y_pca = pca.fit_transform(trajs)
 
@@ -85,7 +92,7 @@ else:
     y0 = np.random.uniform(low=-1, high=1, size=(pca_dim,))
 
 # simulate model results
-t = np.arange(T)
+t = np.arange(T - start)
 u = lambda t: obs[int(t)]
 sol = odeint(ssy.rhs, y0, t, args=(u, coefs, mask, pca_dim + 3))
 
@@ -98,11 +105,10 @@ new_fit_dic = copy.deepcopy(fit_dic)
 new_fit_dic["C"][0][1] = 0.9
 new_fit_dic["C"][0][1] = 0.35
 new_fit_dic["C"][0][2] = 0
-new_trajs, new_obs, _ = get_traj_obs(new_fit_dic)
+new_trajs, new_obs, _ = get_traj_obs(new_fit_dic, start=start)
 
 # apply new observations
-pca3 = PCA(n_components=pca_dim)
-new_y_pca = pca.fit_transform(new_trajs)
+new_y_pca = pca.transform(new_trajs) # original: fit_transform
 new_u = lambda t: new_obs[int(t)]
 new_sol = odeint(ssy.rhs, y0, t, args=(new_u, coefs, mask, pca_dim + 3))
 
